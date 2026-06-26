@@ -1,3 +1,17 @@
+import matplotlib.pyplot as plt
+
+def mean_line(feature,df,stages):
+
+    df = df.loc[feature]
+    means = pd.Series(index=stages)
+
+    for i in stages:
+        stage_mean = df.loc[i].mean()
+        #print(f"Stage is {i}, mean is {stage_mean}")
+        means[i]=stage_mean
+
+    return means
+
 def plot_feature(feature,df,stages,title):
     # get the specific feature and drop any missing embryos (the nans)
     prop_data = df.loc[feature].dropna()
