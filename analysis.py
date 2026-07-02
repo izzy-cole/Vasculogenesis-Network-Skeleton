@@ -69,23 +69,6 @@ def plot_feature_drugs(feature,df,conditions,drug_name,means,means_label):
     plt.show()
 
    
-def gen_pyvis_graph(nodes,adj,name):
-    G = Network(height="750px", width="100%", bgcolor="#1F1F1F", font_color="white",notebook=True)
-    G.toggle_physics(False)
-    for i in nodes.index:
-        node = nodes.loc[i]
-        G.add_node(i,label=i,size=float(node["weight"])/50,x=int(node["x"]),y=int(node["y"]))
-        #G.add_nodes_from([(i, {"x": int(node["x"]), "y": int(node["y"]), "weight":float(node["weight"])})])
-    for i in adj.index:
-        for j in adj.columns:
-            edge_weight = adj.loc[i,j]
-            if edge_weight>0:
-                G.add_edge(i,j,weight=float(edge_weight))
-                if i==j:
-                    print(f"edge between {i} and {j}")
-    #nx.draw(G, with_labels=True)
-    G.show(f"{name}")#,notebook=True)
-    return G
 
 ##not sure this is working
 def violins(df,nodes_all_stages):
@@ -147,13 +130,3 @@ def gen_networkx_graph(nodes,adj):
     #nx.draw(G, with_labels=True)
     return G
 
-def display_network(net,name):
-    #nx.draw(net,with_labels=True)
-
-    new_net = Network(height="750px", width="100%", bgcolor="#1F1F1F", font_color="white")#,notebook=True)
-    new_net.toggle_physics(False) #displays the network
-    new_net.from_nx(net)
-    
-    #[nx.set_node_attributes(net,)]
-    #new_net.save_graph(f"{name}")
-    new_net.show(f"{name}")#,notebook=True)
