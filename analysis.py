@@ -1,4 +1,7 @@
 import matplotlib.pyplot as plt
+import seaborn as sns
+import networkx as nx
+import pandas as pd
 
 def mean_line(feature,df,stages):
 
@@ -130,3 +133,27 @@ def gen_networkx_graph(nodes,adj):
     #nx.draw(G, with_labels=True)
     return G
 
+
+def count_neighbours(adj,min=0,max=999):
+    adj = adj[adj>0]
+    neighbours = adj.count()
+    neighbours = neighbours[neighbours>=min]
+    neighbours = neighbours[neighbours<=max]
+    return neighbours
+
+
+def return_neighbours(adj):
+    adj = adj[adj>0]
+    neighbours = adj.count()
+    neighbours = pd.Series.value_counts(neighbours)
+    return neighbours
+
+def calc_degrees(adj,nodes):
+    neighbours = adj.count()
+    nodes["degree"] = neighbours
+    return nodes
+
+def calc_dists(adj,nodes):
+    dists = adj.mean()
+    nodes["distances"] = dists
+    return nodes
