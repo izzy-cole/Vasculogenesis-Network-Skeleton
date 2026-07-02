@@ -6,6 +6,7 @@ import numpy as np
 
 
 #Change "4" to be the pixel_micron ratio
+#merge these or fix datastructure setup later
 def init_network_info_2d(nodes_list,adj_list,conditions):
 
     properties = ["Number of Nodes","Mean Edge Length","Mean Node Weight","Average Degree of Non-Isolated Nodes","Number of Basis Cycles","Number of Components","Average Clustering","Average Shortest Path","Number of Isolated Nodes","Number of Components, Excluding Isolated Nodes","Proportion of Isolated Nodes"]
@@ -48,12 +49,12 @@ def init_network_info_2d(nodes_list,adj_list,conditions):
 
         xmin = nodes["x"].quantile(0.01)
         xmax = nodes["x"].quantile(0.99)
-        df.loc["Mean Edge Length, Standardised",(stage,n)] = df.loc["Mean Edge Length",(stage,n)]/ (4*(xmax-xmin))
+        df.loc["Mean Edge Length, Standardised",cond] = df.loc["Mean Edge Length",cond]/ (4*(xmax-xmin))
 
     return df
 
 #Change "4" to be the pixel_micron ratio
-def init_network_info_3d(nodes_all_stages,adj_all_stages,stages,conditions):
+def init_network_info_3d(nodes_all_stages,adj_all_stages,stages):
     properties = ["Number of Nodes","Mean Edge Length","Mean Node Weight","Average Degree of Non-Isolated Nodes","Number of Basis Cycles","Number of Components","Average Clustering","Average Shortest Path","Number of Isolated Nodes","Number of Components, Excluding Isolated Nodes","Proportion of Isolated Nodes"]
     max_n = 5
     n_list = range(max_n)
