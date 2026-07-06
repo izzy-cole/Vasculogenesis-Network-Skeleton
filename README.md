@@ -8,7 +8,7 @@
 
 **Skeleton\_analysis\_all\_n.ipynb**
 
-Just runs the model from skeleton\_model.py on the dataset and saves it
+Runs the model from skeleton\_model.py on the dataset and saves it
 
 Merged with skeleton\_analysis\_drugs.ipynb
 
@@ -16,19 +16,10 @@ Merged with skeleton\_analysis\_drugs.ipynb
 
 **Skeleton\_analysis\_results\_all\_n.ipynb**
 
-Just runs graphical plots (no functions)
+Runs code to generate analysis statistics and then generate graphical plots
 
 \- Merge with \_drugs\_brendan, \_drugs
 
-count\_neighbours
-
-return\_neighbours
-
-plot\_feature
-
-calc\_degrees
-
-calc\_dists
 
 
 
