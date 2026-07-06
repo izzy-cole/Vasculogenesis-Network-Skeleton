@@ -1,3 +1,5 @@
+from pyvis.network import Network
+
 def image_plot(image,size,x_min=0,y_min=0):
     #show skeleton
     fig,ax=plt.subplots(figsize=(10,10))
@@ -65,25 +67,26 @@ def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_
     plt.show()
 
 
-def display_network(net,name):
-    #nx.draw(net,with_labels=True)
 
-    new_net = Network(height="750px", width="100%", bgcolor="#1F1F1F", font_color="white")#,notebook=True)
-    new_net.toggle_physics(False) #displays the network
+#weird??? delete?
+def display_networkx(net,name):
+
+    new_net = Network(height="750px", width="100%", bgcolor="#1F1F1F", font_color="white")
+    new_net.toggle_physics(False)
     new_net.from_nx(net)
-    
-    #[nx.set_node_attributes(net,)]
-    #new_net.save_graph(f"{name}")
-    new_net.show(f"{name}")#,notebook=True)
+
+    new_net.show(f"{name}")
 
 
-def gen_pyvis_graph(nodes,adj,name):
+#cant get it to display in notebook (saves only)
+def gen_pyvis_graph(nodes,adj,name,weight_divisor=50):
     G = Network(height="750px", width="100%", bgcolor="#1F1F1F", font_color="white",notebook=True)
     G.toggle_physics(False)
+
     for i in nodes.index:
         node = nodes.loc[i]
-        G.add_node(i,label=i,size=float(node["weight"])/50,x=int(node["x"]),y=int(node["y"]))
-        #G.add_nodes_from([(i, {"x": int(node["x"]), "y": int(node["y"]), "weight":float(node["weight"])})])
+        G.add_node(i,label=i,size=float(node["weight"])/weight_divisor,x=int(node["x"]),y=int(node["y"]))
+
     for i in adj.index:
         for j in adj.columns:
             edge_weight = adj.loc[i,j]
@@ -91,6 +94,9 @@ def gen_pyvis_graph(nodes,adj,name):
                 G.add_edge(i,j,weight=float(edge_weight))
                 if i==j:
                     print(f"edge between {i} and {j}")
-    #nx.draw(G, with_labels=True)
-    G.show(f"{name}")#,notebook=True)
+
+    if name[-5:] != ".html":
+        name = name + ".hmtl"
+
+    G.show(f"{name}")
     return G
