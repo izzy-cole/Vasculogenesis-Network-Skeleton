@@ -1,5 +1,6 @@
 //Do not show processing windows
-setBatchMode(true);
+batchMode = true;
+setBatchMode(batchMode);
 
 //specify stages and n
 stages = newArray(3,4,5,6,7,8,9,10,11,12,13);
@@ -8,6 +9,7 @@ n_s = newArray("1", "2", "3", "4", "5");
 //configure the main and save path
 main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/main/";
 save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/main/";
+csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/temp/imageJ_metadata.csv";
 
 
 //should read in a "hh9_n1 BC.tif" file where the background is clearly black and the blood islands are white (does not need to be a binary/thresholded image)
@@ -61,6 +63,48 @@ for (s=0;s<stages.length;s++){
 	    new_micron_width = 1 / pix_micron_ratio;
 	    run("Set Scale...", "distance=1 known=" + new_micron_width + " unit=microns");
 	    rename("scaled.tif");
+	    
+	    setBatchMode(false);
+	    // Get image dimensions
+		w = getWidth();
+		h = getHeight();
+	    
+	    //Rotate the embryo based on line provided by user
+	    setTool("line");
+		waitForUser("Manual Axis", "Draw a line representing the centre of the embryo, from posterior to anterior. \nImage: " + file_name);
+		run("Measure");
+		// Grab the angle from the last row of the Results table
+		angle = getResult("Angle", nResults - 1);
+		new_angle = angle - 90;
+		run("Rotate... ", "angle="+new_angle+" grid=0 interpolation=Bilinear");
+		
+		
+		//Locate top of embryo
+		setTool("point");
+		waitForUser("Locate anterior", "Draw a point representing the top anterior of the extraembryonic region \nImage: " + file_name);
+		run("Measure");
+		ant_x = getResult("X", nResults - 1);
+        ant_y = getResult("Y", nResults - 1);
+		
+		
+		//Fit ellipse
+		setTool("oval");
+		waitForUser("Fit ellipse", "Draw an ellipse fitting the blood islands \nImage: " + file_name);
+		run("Measure");
+		ell_x = getResult("X", nResults - 1);
+		ell_y = getResult("Y", nResults - 1);
+		ell_w = getResult("Width", nResults - 1);
+		ell_h = getResult("Height", nResults - 1);
+		
+		if (!File.exists(csv_path)) {
+		    File.append("Stage,n,Angle,Width,Height,AnteriorX,AnteriorY,EllipseX,EllipseY,EllipseW,EllipseH", csv_path);
+		}
+		
+		// Append the data for this embryo
+		File.append(stage + "," + n + "," + new_angle + "," + w + "," + h + ","+ant_x+","+ant_y+","+ell_x+","+ell_y+","+ell_w+","+ell_h, csv_path);
+		
+		
+	    setBatchMode(batchMode);
 		
 		//gaussian blur
 		run("Duplicate...", "title=blur_target");
