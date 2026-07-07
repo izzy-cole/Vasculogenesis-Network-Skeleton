@@ -1,4 +1,7 @@
 from pyvis.network import Network
+import matplotlib.pyplot as plt
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Circle
 
 def image_plot(image,size,x_min=0,y_min=0):
     #show skeleton
