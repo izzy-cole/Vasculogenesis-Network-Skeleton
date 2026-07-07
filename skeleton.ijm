@@ -7,7 +7,6 @@ stages = newArray(3,4,5,6,7,8,9,10,11,12,13);
 n_s = newArray("1", "2", "3", "4", "5");
 conditions = newArray("","_10um","_20um","_30um","_40um","_control"); //empty string allows for no conditions in non-drug case
 
-
 //configure the main and save path (comment/uncomment)
 //Todo: set this up with a dialogue box.
 //Default:
@@ -16,7 +15,7 @@ save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/
 csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/temp/imageJ_metadata.csv";
 
 //Drugs:
-date = "04032026";
+date = "19072024";
 drug_name="MMP";
 main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/drugs/"+date+"_"+drug_name+"/";
 save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
@@ -120,11 +119,16 @@ for (s=0;s<stages.length;s++){
 			ell_h = getResult("Height", nResults - 1);
 			
 			if (!File.exists(csv_path)) {
-			    File.append("Stage,n,Angle,Width,Height,AnteriorX,AnteriorY,EllipseX,EllipseY,EllipseW,EllipseH", csv_path);
+			    File.append("Stage,n,Condition,Angle,Width,Height,Anterior_X,Anterior_Y,Ellipse_X,Ellipse_Y,Ellipse_W,Ellipse_H", csv_path);
 			}
 			
 			// Append the data for this embryo
-			File.append(stage + "," + n + "," + new_angle + "," + w + "," + h + ","+ant_x+","+ant_y+","+ell_x+","+ell_y+","+ell_w+","+ell_h, csv_path);
+			if (cond.length()>0){
+				cond2 = substring(cond,1,cond.length());
+			} else{
+				cond2 = cond;
+			}
+			File.append(stage + "," + n + "," +cond2+ ","+ new_angle + "," + w + "," + h + ","+ant_x+","+ant_y+","+ell_x+","+ell_y+","+ell_w+","+ell_h, csv_path);
 			
 			
 		    setBatchMode(batchMode);
