@@ -221,6 +221,7 @@ __marimo__/
 #Non-code files
 data/**
 results/**
+archive/**
 
 #Vscode
 .vscode/
