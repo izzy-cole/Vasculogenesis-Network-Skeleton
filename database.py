@@ -1,11 +1,13 @@
-from config import data_path
+from config import data_path, imagej_metadata_path, processed_path
 import pandas as pd
 import numpy as np
 from pathlib import Path
 
+#todo: add a force overwrite option?
+
 def initialise_metadata():
     #open the metadata file, or create one, if it doesn't exist
-    file = Path(data_path + "processed/metadata.csv")
+    file = Path(processed_path / "metadata.csv")
     if file.exists():
         metadata_df = pd.read_csv(file,index_col="Embryo_ID")
     else:
@@ -36,9 +38,9 @@ def register_embryos_from_imageJ(metadata_df,drug=np.nan,exp_date=np.nan):
 
     #Define the file path
     if pd.isna(drug)  and pd.isna(exp_date):
-        file = Path(data_path + "temp/imageJ_metadata.csv")
+        file = Path(imagej_metadata_path / "imageJ_metadata.csv")
     else:
-        file = Path(data_path + f"temp/{exp_date}_{drug}_imageJ_metadata.csv")
+        file = Path(imagej_metadata_path / f"{exp_date}_{drug}_imageJ_metadata.csv")
 
     if not file.exists():
         print(f"Error: cannot find metadata file: {file}")
@@ -69,7 +71,7 @@ def register_embryos_from_imageJ(metadata_df,drug=np.nan,exp_date=np.nan):
     
 
 def save_metadata(metadata_df):
-    file = Path(data_path + "processed/metadata.csv")
+    file = Path(processed_path / "metadata.csv")
     metadata_df.to_csv(file)
 
 

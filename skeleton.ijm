@@ -5,7 +5,7 @@ setBatchMode(batchMode);
 //specify stages and n
 stages = newArray(3,4,5,6,7,8,9,10,11,12,13);
 n_s = newArray("1", "2", "3", "4", "5");
-conditions = newArray("","_10um","_20um","_30um","_40um","_control"); //empty string allows for no conditions in non-drug case
+conditions = newArray("","_10um","_20um","_30um","_40um","_50um","_control"); //empty string allows for no conditions in non-drug case
 
 //configure the main and save path (comment/uncomment)
 //Todo: set this up with a dialogue box.
@@ -19,7 +19,7 @@ date = "20240803";
 drug_name="MMP";
 main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/drugs/"+date+"_"+drug_name+"/";
 save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
-csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/temp/"+date+"_"+drug_name+"_imageJ_metadata.csv";
+csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/"+date+"_"+drug_name+"_imageJ_metadata.csv";
 
 //should read in a "hh9_n1 BC.tif" file where the background is clearly black and the blood islands are white (does not need to be a binary/thresholded image)
 //each image should include the measurements in microns
