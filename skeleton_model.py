@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 import tifffile as tiff
 from pathlib import Path
-
-
-from config import pix_micron_ratio, microns_per_pixel, base_merge, sensitivity_merge, col_threshold
-
+from config import processed_path
+import os
+import database
+from config import microns_per_pixel, base_merge, sensitivity_merge, col_threshold, conditions
 
 def find_pixel_neighbours(image,x,y):
     #returns a list of adjacent pixels
@@ -101,7 +101,7 @@ def nodes_edges_from_image(image,dists):
 
             if np.all(image[y][x]> [255*(1-col_threshold)]*3): #if pixel is white (within a tolerance threshold to allow for changes in colour due to compression)
                 pixels.append([x,y]) #form pixel list
-                neighbours = find_pixel_neighbours(image,x,y,col_threshold) #find neighbours
+                neighbours = find_pixel_neighbours(image,x,y) #find neighbours
                 #print(f"{x,y}'s neighbours are {neighbours}")
                 count = len(neighbours)
                 weight = dists[y][x] #get the node weight from the distance map
@@ -187,55 +187,69 @@ def merge_nearby_nodes(nodes,adj):
             #print(f"skipping {a} - it has been deleted")
     return nodes,adj
 
-def form_networks_all(stages,path,compression=1):
+def form_networks_all(path):
 
-    nodes_all_stages = []
-    adj_all_stages = []
+    nodes_list = []
+    adj_list = []
 
-    for stage in stages:
-        nodes_list = []
-        adj_list = []
-        print(f"Stage is {stage}")
-        n=1
-        n_maxxed = False #repeat until files cannot be found
-        while not n_maxxed:
-            #input images MUST be .tiffs: the distance map information needs to be stored as 32 bit .tif data to record an objective measurement in microns
+    for file_name in os.listdir(path):
 
-            try:
-                image = tiff.imread(f'{path}n{n}_hh{stage}_skeleton.tif')
-                dists = tiff.imread(f"{path}n{n}_hh{stage}_distmap.tif")
-            except:  #file not found
-                n_maxxed=True
-                nodes_all_stages.append(nodes_list)
-                adj_all_stages.append(adj_list)       
-
+        #Get the stage,n,condition from the file name
+        data, end = file_name.split(" ")
+        if end=="skeleton.tif":
+            data = data.split("_")
+            if len(data)==2:
+                stage, n = data
+                stage = int(stage[2:]) #Remove "hh"
+                n = int(n[1:]) #Remove "n"
+                condition = np.nan
+                skel = tiff.imread(path / f"hh{stage}_n{n} skeleton.tif")
+                dists = tiff.imread(path / f"hh{stage}_n{n} distmap.tif")
+            if len(data)==3:
+                stage, n, condition = data
+                stage = int(stage[2:]) #Remove "hh"
+                n = int(n[1:]) #Remove "n"
+                skel = tiff.imread(path / f"hh{stage}_n{n}_{condition} skeleton.tif")
+                dists = tiff.imread(path / f"hh{stage}_n{n}_{condition} distmap.tif")
             else:
-                print(f"Image HH{stage}, n={n}")
+                print(f"Error: unknown file name {file_name}")
 
-                #apply image compression: compression should NOT be used for skeleton images (set param to 1)
-                image = cv2.resize(image, None, fx=compression,fy=compression)
-                dists = cv2.resize(dists, None, fx=compression,fy=compression)
+            metadata_df = database.initialise_metadata()
+            embryo_ID = database.get_embryo_ID(metadata_df,stage,n,condition)
 
-                height = len(image)
-                width = len(image[0])
+            save_dir = processed_path / "skeleton_networks"
+
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+
+            if not Path(save_dir / f"{embryo_ID}_nodes.csv").exists() or not Path(save_dir / f"{embryo_ID}_adj.csv").exists:
+                print(f"No existing file found for image HH{stage}, n{n} {condition}. Embryo ID: {embryo_ID}. Procesing now.")
+
+                height = len(skel)
+                width = len(skel[0])
                 print(f"Dimensions in pixels {width}x{height}")
                 #print(f"There are {microns_per_pixel} microns per pixel")
                 print(f"Dimensions in microns {width*microns_per_pixel}x{height*microns_per_pixel}")
 
                 #set up node and edge matrices
-                nodes,adj = nodes_edges_from_image(image,dists)
+                nodes,adj = nodes_edges_from_image(skel,dists)
                 print(f"Unmerged length:{len(nodes)}")
-                #visualise_image(image,dists,nodes,adj)
-
 
                 #apply merging on nearby nodes
                 nodes2,adj2 = merge_nearby_nodes(nodes,adj)
-                nodes_list.append(nodes2)
-                adj_list.append(adj2)
+
+                save_dir = processed_path / "skeleton_networks"
+
+                if not os.path.exists(save_dir):
+                    os.makedirs(save_dir)
+
+                nodes2.to_csv(save_dir / f"{embryo_ID}_nodes.csv")
+                adj2.to_csv(save_dir / f"{embryo_ID}_adj.csv")
+
                 print(f"Merged length:{len(nodes2)}")
-                #visualise_image(image,dists,nodes2,adj2)
                 print("\n")
-            n=n+1
+            else:
+                print(f"Existing file found for image HH{stage}, n{n} {condition}. Embryo ID: {embryo_ID}.")
 
 
-    return nodes_all_stages, adj_all_stages
+

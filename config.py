@@ -20,3 +20,8 @@ sensitivity_merge=0.08 #multiplier term
 
 #permitted tolerance for black vs white (e.g. in case of compression artefacts)
 col_threshold = 0.85
+
+
+conditions = ["","_10um","_20um","_30um","_40um","_50um","_control"] #empty string allows for no conditions in non-drug case
+
+ #input images MUST be .tiffs: the distance map information needs to be stored as 32 bit .tif data to record an objective measurement in microns
