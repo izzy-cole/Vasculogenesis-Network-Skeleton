@@ -15,7 +15,7 @@ save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/
 csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/temp/imageJ_metadata.csv";
 
 //Drugs:
-date = "19072024";
+date = "20240803";
 drug_name="MMP";
 main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/drugs/"+date+"_"+drug_name+"/";
 save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
