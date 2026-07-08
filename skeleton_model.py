@@ -2,11 +2,15 @@ import cv2
 import numpy as np
 import pandas as pd
 import tifffile as tiff
+from pathlib import Path
 
 
-def find_pixel_neighbours(image,x,y,threshold):
+from config import pix_micron_ratio, microns_per_pixel, base_merge, sensitivity_merge, col_threshold
+
+
+def find_pixel_neighbours(image,x,y):
     #returns a list of adjacent pixels
-    white = [255*(1-threshold)]*3
+    white = [255*(1-col_threshold)]*3
     neighbours = []
     if np.all(image[y][x-1] > white):
         neighbours.append([x-1,y])
@@ -81,7 +85,7 @@ def coords_to_id(nodes,x,y):
 
 
 
-def nodes_edges_from_image(image,dists,threshold,microns_per_pixel):
+def nodes_edges_from_image(image,dists):
 
     nodes = pd.DataFrame(data=None, columns=["x","y","type","weight"]) #main datastructure
     pix_neighbours = pd.Series(data=None) #keep temp track of white pixel neighbours
@@ -95,9 +99,9 @@ def nodes_edges_from_image(image,dists,threshold,microns_per_pixel):
     for x in range(1, width-1):
         for y in range(1, height-1):
 
-            if np.all(image[y][x]> [255*(1-threshold)]*3): #if pixel is white (within a tolerance threshold to allow for changes in colour due to compression)
+            if np.all(image[y][x]> [255*(1-col_threshold)]*3): #if pixel is white (within a tolerance threshold to allow for changes in colour due to compression)
                 pixels.append([x,y]) #form pixel list
-                neighbours = find_pixel_neighbours(image,x,y,threshold) #find neighbours
+                neighbours = find_pixel_neighbours(image,x,y,col_threshold) #find neighbours
                 #print(f"{x,y}'s neighbours are {neighbours}")
                 count = len(neighbours)
                 weight = dists[y][x] #get the node weight from the distance map
@@ -141,7 +145,7 @@ def get_node_adjacencies(adj,id):
     return [i for i in adj.index if adj.loc[id,i]>0]
 
 
-def merge_nearby_nodes(nodes,adj,sensitivity,base,microns_per_pixel):
+def merge_nearby_nodes(nodes,adj):
 
     del_list = []
     #'a' and 'b' are IDs of two nodes
@@ -156,7 +160,7 @@ def merge_nearby_nodes(nodes,adj,sensitivity,base,microns_per_pixel):
                 #print(f"b is {b}")
                 dist = adj.loc[a,b]
                 xb,yb = nodes[["x","y"]].loc[b]
-                if dist <= weight*sensitivity + base*microns_per_pixel: #too close: will merge
+                if dist <= weight*sensitivity_merge + base_merge*microns_per_pixel: #too close: will merge
                     #print(f"Max dist is {weight*sensitivity}, distance {dist} from {xa,ya} to {xb,yb}")
 
                     neighbours_b=get_node_adjacencies(adj,b)
@@ -183,7 +187,7 @@ def merge_nearby_nodes(nodes,adj,sensitivity,base,microns_per_pixel):
             #print(f"skipping {a} - it has been deleted")
     return nodes,adj
 
-def form_networks_all(stages,path,microns_per_pixel,compression=1,threshold=0.85,base=1,dist_propn=0.1):
+def form_networks_all(stages,path,compression=1):
 
     nodes_all_stages = []
     adj_all_stages = []
@@ -219,13 +223,13 @@ def form_networks_all(stages,path,microns_per_pixel,compression=1,threshold=0.85
                 print(f"Dimensions in microns {width*microns_per_pixel}x{height*microns_per_pixel}")
 
                 #set up node and edge matrices
-                nodes,adj = nodes_edges_from_image(image,dists,threshold,microns_per_pixel)
+                nodes,adj = nodes_edges_from_image(image,dists)
                 print(f"Unmerged length:{len(nodes)}")
                 #visualise_image(image,dists,nodes,adj)
 
 
                 #apply merging on nearby nodes
-                nodes2,adj2 = merge_nearby_nodes(nodes,adj,dist_propn,base,microns_per_pixel)
+                nodes2,adj2 = merge_nearby_nodes(nodes,adj)
                 nodes_list.append(nodes2)
                 adj_list.append(adj2)
                 print(f"Merged length:{len(nodes2)}")
