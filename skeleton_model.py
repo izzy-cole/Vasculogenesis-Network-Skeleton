@@ -217,11 +217,12 @@ def form_networks_all(path):
             metadata_df = database.initialise_metadata()
             embryo_ID = database.get_embryo_ID(metadata_df,stage,n,condition)
 
+            #form save directory if it doesnt exist yet
             save_dir = processed_path / "skeleton_networks"
-
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
 
+            #save file not found, so run the skeleton model
             if not Path(save_dir / f"{embryo_ID}_nodes.csv").exists() or not Path(save_dir / f"{embryo_ID}_adj.csv").exists:
                 print(f"No existing file found for image HH{stage}, n{n} {condition}. Embryo ID: {embryo_ID}. Procesing now.")
 
