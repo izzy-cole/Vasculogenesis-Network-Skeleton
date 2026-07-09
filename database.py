@@ -31,6 +31,19 @@ def get_embryo_ID(metadata_df,stage,n,condition=None):
         print("Error: multiple embryos defined with the same (stage,n,condition) tuple.")
         return -1 
 
+def get_embryo_IDs_from_condition(metadata_df, condition=np.nan,stages=[]):
+    if pd.isna(condition):
+        filtered_df = metadata_df[pd.isna(metadata_df["Condition"])]
+    else:
+        filtered_df =  metadata_df[metadata_df["Condition"]==condition]
+
+    if len(stages)>0:
+        print(filtered_df)
+        print(filtered_df["Stage"].isin(stages))
+        filtered_df = filtered_df[filtered_df["Stage"].isin(stages)]
+
+    return filtered_df.index.values
+
 def register_embryos_from_imageJ(metadata_df,drug=np.nan,exp_date=np.nan):
     #Generates database from .csv files provided by the ImageJ macro skeleton.ijm
     append_count = 0
