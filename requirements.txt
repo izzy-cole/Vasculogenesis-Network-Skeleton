@@ -7,3 +7,5 @@ networkx
 tifffile
 pyvis
 skimage
+pathlib
+os
