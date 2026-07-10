@@ -130,7 +130,7 @@ for (s=0;s<stages.length;s++){
 			}
 			File.append(stage + "," + n + "," +cond2+ ","+ new_angle + "," + w + "," + h + ","+ant_x+","+ant_y+","+ell_x+","+ell_y+","+ell_w+","+ell_h, csv_path);
 			
-			
+			run("Select None");
 		    setBatchMode(batchMode);
 			
 			//gaussian blur
@@ -180,5 +180,3 @@ for (s=0;s<stages.length;s++){
 		}
 	}
 }
-
-print("Done!")
