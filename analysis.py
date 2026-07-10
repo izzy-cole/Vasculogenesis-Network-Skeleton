@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import os
+import database
+import seaborn as sns
 
 from config import processed_path, microns_per_pixel
 
@@ -44,7 +46,7 @@ def register_summary_data():
                 print(f"Embryo {embryo_ID} found in summary database")
                 #Todo: check if any statistics are missing, e.g. if a new column is added, then rerun the analysis.
             else:
-                print(f"Embryo {embryo_ID} not found in summary database, generating statistics")
+                print(f"Embryo {embryo_ID} not found in summary database, generating and saving statistics")
 
 
                 nodes = pd.read_csv(nodes_path / f"{embryo_ID}_nodes.csv", index_col = 0)
@@ -61,13 +63,18 @@ def register_summary_data():
                 G=gen_networkx_graph(nodes,adj)
                 #print(f"Network generation complete\n")
 
-                largest_cc = max(nx.connected_components(G), key=len)
-                G_comp = G.subgraph(largest_cc).copy()
+                cc = nx.connected_components(G)
+                largest_cc = max(nx.connected_components(G), key=len,default=0)
+                if largest_cc!=0:
+                    G_comp = G.subgraph(largest_cc).copy()
+                    summary_df.loc[embryo_ID,"Average Shortest Path"] = nx.average_shortest_path_length(G_comp, weight='weight') #average shortest path of the largest component
 
                 summary_df.loc[embryo_ID,"Number of Basis Cycles"] = len(sorted(nx.cycle_basis(G)))
                 summary_df.loc[embryo_ID,"Number of Components"] = len(sorted(nx.connected_components(G)))
-                summary_df.loc[embryo_ID,"Average Clustering"] = nx.average_clustering(G)
-                summary_df.loc[embryo_ID,"Average Shortest Path"] = nx.average_shortest_path_length(G_comp, weight='weight') #average shortest path of the largest component
+                try:
+                    summary_df.loc[embryo_ID,"Average Clustering"] = nx.average_clustering(G)
+                except:
+                    print("Error collecting clustering data")
 
 
                 summary_df.loc[embryo_ID,"Number of Components, Excluding Isolated Nodes"] = summary_df.loc[embryo_ID,"Number of Components"] - summary_df.loc[embryo_ID,"Number of Isolated Nodes",]
@@ -77,77 +84,75 @@ def register_summary_data():
                 xmax = nodes["x"].quantile(0.99)
                 summary_df.loc[embryo_ID,"Mean Edge Length, Standardised"] = summary_df.loc[embryo_ID,"Mean Edge Length"]/ (microns_per_pixel*(xmax-xmin))
 
+                save_summary(summary_df)
     return summary_df
 
 
-def mean_line(feature,df,stages):
+def load_master_df():
+    #Combines the network summary data with metadata allowing for easy indexing
+    metadata_df = database.initialise_metadata()
+    summary_df = initialise_summary()
+    
+    #join them using embryo_id index
+    master_df = metadata_df.join(summary_df, how="inner")
+    return master_df
 
-    df = df.loc[feature]
-    means = pd.Series(index=stages)
+#Could combine stage/condition function
+def plot_feature_by_stage(feature,title="",embryo_ID_list=None):
 
-    for i in stages:
-        stage_mean = df.loc[i].mean()
-        #print(f"Stage is {i}, mean is {stage_mean}")
-        means[i]=stage_mean
+    master_df = load_master_df()
 
-    return means
+    #display only a subset of embryos if chosen
+    if embryo_ID_list is not None:
+        master_df = master_df.loc[embryo_ID_list]
 
-def plot_feature(feature,df,stages,title):
-    # get the specific feature and drop any missing embryos (the nans)
-    prop_data = df.loc[feature].dropna()
-
-    # prop_data is now a Series. 
-    # The index contains your (Stage, n) pairs.
-    # The values contain your actual numbers.
-
-    stages_n = prop_data.index.get_level_values('Stage') # Grabs just the Stage numbers for each n
-    values = prop_data.values                          # Grabs the actual data points
-    means = mean_line(feature,df,stages)
-
-    plt.figure(figsize=(8, 5))
-    plt.scatter(stages_n, values, alpha=0.7, edgecolors='black')
-    plt.plot(stages,means,linewidth=3)
+    #remove any empty feature data (e.g. no cycles present)
+    master_df = master_df.dropna(subset=[feature])
+    sns.lineplot(data=master_df, x="Stage",y=feature, linewidth=2.5)
+    plt.title(feature)
+    
 
     plt.xlabel("HH Stage")
-    plt.xticks(stages) # Ensures your X-axis only shows the actual stage numbers
     if feature== "Mean Edge Length":
         plt.ylabel(f"{feature} in $\\mu m$")
         plt.ylim(bottom=0)
-    else:
-        plt.ylabel(feature)
+
     if title!="":
         plt.title(f"{title} Per Embryo")
-        plt.savefig(f'results/skeleton/main_figs_svgs/{title}.svg', transparent=True, dpi=300)
+        #plt.savefig(f'results/skeleton/main_figs_svgs/{title}.svg', transparent=True, dpi=300)
     else:
         plt.title(f"{feature} Per Embryo")
-        plt.savefig(f'results/skeleton/main_figs_svgs/{feature}.svg', transparent=True, dpi=300)
-    
-    
+        #plt.savefig(f'results/skeleton/main_figs_svgs/{feature}.svg', transparent=True, dpi=300)
+
     plt.show()
 
-def plot_feature_drugs(feature,df,conditions,drug_name,means,means_label):
-    # get the specific feature and drop any missing embryos (the nans)
-    plt.figure(figsize=(8, 5))
-    plt.scatter(conditions, df.loc[feature], alpha=0.7, edgecolors='black')
-    #plt.plot(stages,means,linewidth=3)
+def plot_feature_by_condition(feature,title=None,embryo_ID_list=None):
 
-    plt.xlabel("Drug Condition")
+    master_df = load_master_df()
+
+    #display only a subset of embryos if chosen
+    if embryo_ID_list != None:
+        master_df = master_df.loc[embryo_ID_list]
+
+    #remove any empty feature data (e.g. no cycles present)
+    master_df = master_df.dropna(subset=[feature])
+    sns.lineplot(data=master_df, x="Condition",y=feature, linewidth=2.5)
+    plt.title(feature)
+    
+
+    plt.xlabel("HH Stage")
     if feature== "Mean Edge Length":
-        plt.ylabel(f"{feature} in Microns")
+        plt.ylabel(f"{feature} in $\\mu m$")
+        plt.ylim(bottom=0)
+
+    if title is not None:
+        plt.title(f"{title} Per Embryo")
+        #plt.savefig(f'results/skeleton/main_figs_svgs/{title}.svg', transparent=True, dpi=300)
     else:
-        plt.ylabel(feature)
-
-    if feature== "Number of Components":
-        plt.ylim(top=600)
-
-    plt.axhline(means[feature],label=f"{means_label} mean (no drugs)")
-    plt.legend()
-    plt.title(f"{drug_name}: {feature} per Embryo")
-    #plt.xticks(stages) # Ensures your X-axis only shows the actual stage numbers
-    plt.ylim(bottom=0)
+        plt.title(f"{feature} Per Embryo")
+        #plt.savefig(f'results/skeleton/main_figs_svgs/{feature}.svg', transparent=True, dpi=300)
 
     plt.show()
-
    
 
 ##not sure this is working
@@ -228,12 +233,12 @@ def return_neighbours(adj):
     neighbours = pd.Series.value_counts(neighbours)
     return neighbours
 
-def calc_degrees(adj,nodes):
+def calc_degrees(nodes,adj):
     neighbours = adj.count()
     nodes["degree"] = neighbours
     return nodes
 
-def calc_dists(adj,nodes):
+def calc_dists(nodes,adj):
     dists = adj.mean()
     nodes["distances"] = dists
     return nodes

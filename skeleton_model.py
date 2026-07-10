@@ -205,7 +205,7 @@ def form_networks_all(path):
                 condition = np.nan
                 skel = tiff.imread(path / f"hh{stage}_n{n} skeleton.tif")
                 dists = tiff.imread(path / f"hh{stage}_n{n} distmap.tif")
-            if len(data)==3:
+            elif len(data)==3:
                 stage, n, condition = data
                 stage = int(stage[2:]) #Remove "hh"
                 n = int(n[1:]) #Remove "n"
