@@ -15,7 +15,8 @@ def initialise_metadata():
     metadata_df.index.name = "Embryo_ID"
     return metadata_df
 
-def get_embryo_ID(metadata_df,stage,n,condition=None):
+def get_embryo_ID(stage,n,condition=None):
+    metadata_df = initialise_metadata()
     #Find a match for the embryo ID from the (stage,n,condition) data
     if condition == None or pd.isna(condition):
         index = metadata_df[(metadata_df["Stage"]==stage) & (metadata_df["n"]==n) & (pd.isna(metadata_df["Condition"]))].index
@@ -31,7 +32,8 @@ def get_embryo_ID(metadata_df,stage,n,condition=None):
         print("Error: multiple embryos defined with the same (stage,n,condition) tuple.")
         return -1 
 
-def get_embryo_IDs_from_condition(metadata_df, condition=np.nan,stages=[]):
+def get_embryo_IDs_from_condition(condition=np.nan,stages=[]):
+    metadata_df = initialise_metadata()
     if pd.isna(condition):
         filtered_df = metadata_df[pd.isna(metadata_df["Condition"])]
     else:
@@ -44,7 +46,8 @@ def get_embryo_IDs_from_condition(metadata_df, condition=np.nan,stages=[]):
 
     return filtered_df.index.values
 
-def register_embryos_from_imageJ(metadata_df,drug=np.nan,exp_date=np.nan):
+def register_embryos_from_imageJ(drug=np.nan,exp_date=np.nan):
+    metadata_df = initialise_metadata()
     #Generates database from .csv files provided by the ImageJ macro skeleton.ijm
     append_count = 0
     skip_count = 0
@@ -79,7 +82,8 @@ def register_embryos_from_imageJ(metadata_df,drug=np.nan,exp_date=np.nan):
                 metadata_df.loc[new_id] = row
             else: # Embryo already in database
                 skip_count += 1
-        print(f"{skip_count} embryos were skipped (already in database), {append_count} new embryos were appended. Total count: {len(metadata_df.index)}")
+        print(f"{skip_count} embryos were skipped (already in database), {append_count} new embryos were appended. Total count: {len(metadata_df.index)}. Database saved.")
+        save_metadata(metadata_df)
         return metadata_df
     
 
