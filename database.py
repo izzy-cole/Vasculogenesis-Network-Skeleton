@@ -40,8 +40,6 @@ def get_embryo_IDs_from_condition(condition=np.nan,stages=[]):
         filtered_df =  metadata_df[metadata_df["Condition"]==condition]
 
     if len(stages)>0:
-        print(filtered_df)
-        print(filtered_df["Stage"].isin(stages))
         filtered_df = filtered_df[filtered_df["Stage"].isin(stages)]
 
     return filtered_df.index.values
