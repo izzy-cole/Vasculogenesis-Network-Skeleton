@@ -70,9 +70,9 @@ def register_embryos_from_imageJ(drug=np.nan,exp_date=np.nan):
             row = imageJ_metadata.loc[i]
 
             if "Condition" in row.index:
-                id = get_embryo_ID(metadata_df, row["Stage"], row["n"], row["Condition"])
+                id = get_embryo_ID(row["Stage"], row["n"], row["Condition"])
             else:
-                id = get_embryo_ID(metadata_df, row["Stage"], row["n"])
+                id = get_embryo_ID(row["Stage"], row["n"])
 
             if id == -1: #This embryo is not yet in the database, so add it
                 append_count +=1

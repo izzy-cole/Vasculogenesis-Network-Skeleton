@@ -214,8 +214,7 @@ def form_networks_all(path):
             else:
                 print(f"Error: unknown file name {file_name}")
 
-            metadata_df = database.initialise_metadata()
-            embryo_ID = database.get_embryo_ID(metadata_df,stage,n,condition)
+            embryo_ID = database.get_embryo_ID(stage,n,condition)
 
             #form save directory if it doesnt exist yet
             save_dir = processed_path / "skeleton_networks"
