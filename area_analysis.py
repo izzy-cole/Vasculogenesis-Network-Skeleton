@@ -9,7 +9,7 @@ import analysis
 import database
 
 
-def find_area(image,microns_per_pixel,threshold=0.85):
+def find_area(image):
     height = len(image)
     width = len(image[0])
     pixel_count = 0
@@ -29,41 +29,53 @@ def normalise_area(area,embryo_ID):
     h = metadata_df.loc[embryo_ID,"Ellipse_H"]
     return area / (np.pi * w/2 * h/2)
 
-def get_pixel_neighbours(image,pixel):
-    new_neighbours = []
-    x,y = pixel
-    neighbours = [[x-1,y-1], [x,y-1],[x-1,y],[x+1,y],[x,y+1],[x+1,y+1],[x-1,y+1],[x+1,y-1]]
-    for i in neighbours:
-        x_neigh, y_neigh = i
-        if image[y_neigh][x_neigh]>0:
-            new_neighbours.append([x_neigh,y_neigh])
-
-    return new_neighbours
-
 def find_components(image):
     height = len(image)
     width = len(image[0])
     
     components = pd.DataFrame(columns=["Area","Perimeter","Pixels"])
+    offsets = [[-1,-1], [0,-1],[-1,0],[1,0],[0,1],[1,1],[-1,1],[1,-1]]
 
+    visited = set()
+    all_components = []
     pixel_list = []
-    for x in range(1, width-1):
-        for y in range(1, height-1):
-            if image[y][x] >0:
-                pixel_list.append([x,y])
+    for x in range(width):
+        for y in range(height):
 
-    while pixel_list != []:
-        comp_pixels = [pixel_list[0]]
-        added = True
-        while added:
-            for i in comp_pixels:
-                neighs = get_pixel_neighbours(image,i)
-                #todo: add only the unique neighbours, stop when no new neighbours are added (has reached edge of component)
+            pix = (x,y)
+            if image[y][x] > 0 and pix not in visited:
+                #form new component tracking list
+                comp_pixels = []
+                check_queue = [pix]
+                visited.add(pix)
+
+                while len(check_queue)>0:
+                    new_pix = check_queue.pop(0)
+                    comp_pixels.append(new_pix)
+
+                    for i in offsets:
+                        x_0,y_0 = new_pix
+                        x_neigh= x_0 + i[0]
+                        y_neigh = y_0 + i[1]
+                        if 0 <= x_neigh < width and 0<= y_neigh < height: #account for border pixels
+                            if image[y_neigh][x_neigh]>0 and (x_neigh,y_neigh) not in visited:
+                                visited.add((x_neigh,y_neigh))
+                                check_queue.append((x_neigh,y_neigh))
+
+                all_components.append(comp_pixels)
+    return all_components
+
+def component_dists(image):
+    all_components = find_components(image)
+    dists = []
+    for i in all_components:
+        dists.append(len(i)*((microns_per_pixel) ** 2))
+    return dists
 
 
 #This is inconsistent data handling with other code. It should save these area results to a new database and concat with metadata (master_df) to plot via sns
 def normalised_area_graph(embryo_ID_list):
-    area_df = pd.DataFrame(columns=["Stage","n","Condition","Area","Normalised Area"])
+    area_df = pd.DataFrame(columns=["Stage","n","Condition","Area","Normalised Area","Area Distribution"])
     for embryo_ID in embryo_ID_list:
         metadata_df=database.initialise_metadata()
         n = int(metadata_df.loc[embryo_ID,"n"])
@@ -78,7 +90,7 @@ def normalised_area_graph(embryo_ID_list):
         area_df.loc[embryo_ID,"n"] = n
         area_df.loc[embryo_ID,"Condition"] = condition
 
-        area = find_area(image,microns_per_pixel)
+        area = find_area(image)
         area_df.loc[embryo_ID,"Area"] = area
         area = normalise_area(area,embryo_ID)
         area_df.loc[embryo_ID,"Normalised Area"] = area
@@ -97,3 +109,26 @@ def normalised_area_graph(embryo_ID_list):
     plt.ylabel("Fractional Area (Normalised to Embryo Size)")
 
     plt.title(f"Area Distribution over Embryo Development")
+    plt.show()
+
+def area_distribution_plot(embryo_ID):
+    metadata_df=database.initialise_metadata()
+    n = int(metadata_df.loc[embryo_ID,"n"])
+    stage = int(metadata_df.loc[embryo_ID,"Stage"])
+    condition = metadata_df.loc[embryo_ID,"Condition"]
+    if pd.isna(condition):
+        image = tiff.imread(main_image_path / f"hh{stage}_n{n} particles.tif")
+    else:
+        image = tiff.imread(main_image_path / f"hh{stage}_n{n}_{condition} particles.tif")
+
+
+    dist = component_dists(image)
+
+    plt.hist(np.log(dist),bins=20)
+
+    plt.xlabel("Log Blood Island Cluster Size ($\\mu m^2$)")
+    plt.ylabel("Number of Clusters")
+    plt.title(f"Blood Island Cluster Size Distribution for a HH{stage} Embryo")
+
+    plt.xlim(3,18)
+    plt.show()
