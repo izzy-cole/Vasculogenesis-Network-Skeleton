@@ -29,7 +29,7 @@ def save_summary(summary_df):
     summary_df.to_csv(file)
 
 
-def register_summary_data():
+def register_skeleton_summary_data():
 
     #load database
     nodes_path = processed_path / "skeleton_networks"
