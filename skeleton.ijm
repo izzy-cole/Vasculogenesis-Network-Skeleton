@@ -12,14 +12,14 @@ conditions = newArray("","_10um","_20um","_30um","_40um","_50um","_control"); //
 //Default:
 main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/main/";
 save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/main/";
-csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/temp/imageJ_metadata.csv";
+csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/imageJ_metadata.csv";
 
 //Drugs:
-date = "20240803";
-drug_name="MMP";
-main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/drugs/"+date+"_"+drug_name+"/";
-save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
-csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/"+date+"_"+drug_name+"_imageJ_metadata.csv";
+//date = "20240803";
+//drug_name="MMP";
+//main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/drugs/"+date+"_"+drug_name+"/";
+//save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
+//csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/"+date+"_"+drug_name+"_imageJ_metadata.csv";
 
 //should read in a "hh9_n1 BC.tif" file where the background is clearly black and the blood islands are white (does not need to be a binary/thresholded image)
 //each image should include the measurements in microns
@@ -168,6 +168,11 @@ for (s=0;s<stages.length;s++){
 			
 			//save distance maps
 			saveAs("Tiff", save_path+"hh"+stage+"_n"+n+cond+" distmap.tif");
+			
+			
+			selectImage("particles.tif");
+			saveAs("Tiff", save_path+"hh"+stage+"_n"+n+cond+" particles.tif");
+
 			
 			//OPTIONAL: just save the scaled image to the python folder - not needed for Python but makes it easy to check for mistakes.
 			selectImage("scaled.tif");
