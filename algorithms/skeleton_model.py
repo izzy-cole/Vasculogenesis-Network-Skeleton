@@ -187,7 +187,7 @@ def merge_nearby_nodes(nodes,adj):
             #print(f"skipping {a} - it has been deleted")
     return nodes,adj
 
-def form_networks_all(path):
+def form_networks_all(path,skips=[]):
 
     nodes_list = []
     adj_list = []
@@ -213,6 +213,11 @@ def form_networks_all(path):
                 dists = tiff.imread(path / f"hh{stage}_n{n}_{condition} distmap.tif")
             else:
                 print(f"Error: unknown file name {file_name}")
+
+
+            if [stage,n,condition] in skips or [stage,n] in skips:
+                print(f"Skipping {file_name}")
+                continue
 
             embryo_ID = database.get_embryo_ID(stage,n,condition)
 
