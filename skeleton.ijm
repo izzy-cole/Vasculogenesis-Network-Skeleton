@@ -27,14 +27,6 @@ csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/p
 //save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
 //csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/"+date+"_"+drug_name+"_imageJ_metadata.csv";
 
-//Live imaging:
-//s=12;
-//n=1;
-//main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/live_imaging/hh"+stage+"_n"+n+"/";
-//save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/live_imaging/hh"+stage+"_n"+n+"/";
-//csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/imageJ_metadata_live.csv";
-//live_imaging = true;
-
 
 //spatial resolution: number of pixels per micron
 //would be nice if this could read from a central config.py file
@@ -46,7 +38,7 @@ blur_in_microns = 7.5;
 //minimum particle size in microns squared
 min_particle_size=900;
 
-//Radius for local thresholding in microns (?)
+//Radius for local thresholding in microns
 local_threshold_radius=30;
 
 //Change to a while loop??
@@ -98,24 +90,25 @@ for (s=0;s<stages.length;s++){
 		    new_micron_width = 1 / pix_micron_ratio;
 		    run("Set Scale...", "distance=1 known=" + new_micron_width + " unit=microns");
 		    rename("scaled.tif");
-		     setBatchMode(false);
+		    setBatchMode(false);
 		     
-		    if (record_metadata){
+		   
 			   
-			    // Get image dimensions
-				w = getWidth();
-				h = getHeight();
-			    
-			    //Rotate the embryo based on line provided by user
-			    run("Clear Results");
-			    setTool("line");
-				waitForUser("Manual Axis", "Draw a line representing the centre of the embryo, from posterior to anterior. \nImage: " + file_name);
-				run("Measure");
-				// Grab the angle from the last row of the Results table
-				angle = getResult("Angle", nResults - 1);
-				new_angle = angle - 90;
-				run("Rotate... ", "angle="+new_angle+" grid=0 interpolation=Bilinear");
-				
+		    // Get image dimensions
+			w = getWidth();
+			h = getHeight();
+		    
+		    //Rotate the embryo based on line provided by user
+		    run("Clear Results");
+		    setTool("line");
+			waitForUser("Manual Axis", "Draw a line representing the centre of the embryo, from posterior to anterior. \nImage: " + file_name);
+			run("Measure");
+			// Grab the angle from the last row of the Results table
+			angle = getResult("Angle", nResults - 1);
+			new_angle = angle - 90;
+			run("Rotate... ", "angle="+new_angle+" grid=0 interpolation=Bilinear");
+			
+			if (record_metadata){	
 				
 				//Locate top of embryo
 				run("Clear Results");
@@ -150,8 +143,8 @@ for (s=0;s<stages.length;s++){
 			    
 		    }
 		    
+		    //Set contrast
 			run("Select None");
-			
 			run("Brightness/Contrast...");
 			waitForUser("Set min/max", "Set min/max in BC panel, then press OK when done.");
 			run("Apply LUT");
@@ -165,10 +158,9 @@ for (s=0;s<stages.length;s++){
 			run("Duplicate...", "title=blur_target");
 			selectImage("blur_target");
 			run("Gaussian Blur...", "sigma="+blur_in_microns+ " scaled"); //"scaled" means it works in the microns unit
-			run("Duplicate...", "title=blur_target");
 
 			
-			//NEW Local thresholding section
+			//Local thresholding section
 			if (!low_contrast){
 				//Get dark and light using mean and stddev (to prevent outlier pixels affecting the range)
 				getStatistics(area, mean, min, max, stdDev);
@@ -214,7 +206,7 @@ for (s=0;s<stages.length;s++){
 			close("blur_target");
 
 			
-			//NEW deletion step
+			//deletion step
 			setTool("freehand");
 			waitForUser("Delete Noise", "Delete any noise or unneeded blood island regions, then press OK when done.");
 			run("Select None");
