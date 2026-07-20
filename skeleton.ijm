@@ -1,6 +1,7 @@
 //Do not show processing windows
 batchMode = true;
 setBatchMode(batchMode);
+live_imaging = false;
 
 //specify stages and n
 stages = newArray(3,4,5,6,7,8,9,10,11,12,13);
@@ -9,10 +10,13 @@ conditions = newArray("","_10um","_20um","_30um","_40um","_50um","_control"); //
 
 //configure the main and save path (comment/uncomment)
 //Todo: set this up with a dialogue box.
+//should read in a "hh9_n1 BC.tif" file where the background is clearly black and the blood islands are white (does not need to be a binary/thresholded image)
+//each image should include the measurements in microns
+
 //Default:
-main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/main_local/";
-save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/main_local/";
-csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/imageJ_metadata_local.csv";
+main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/main/";
+save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/main/";
+csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/imageJ_metadata.csv";
 
 //Drugs:
 //date = "20240803";
@@ -21,8 +25,14 @@ csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/p
 //save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
 //csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/"+date+"_"+drug_name+"_imageJ_metadata.csv";
 
-//should read in a "hh9_n1 BC.tif" file where the background is clearly black and the blood islands are white (does not need to be a binary/thresholded image)
-//each image should include the measurements in microns
+//Live imaging:
+s=12;
+n=1;
+main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/live_imaging/hh"+stage+"_n"+n+"/";
+save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/live_imaging/hh"+stage+"_n"+n+"/";
+csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/imageJ_metadata_live.csv";
+live_imaging = true;
+
 
 //spatial resolution: number of pixels per micron
 //would be nice if this could read from a central config.py file
@@ -87,53 +97,59 @@ for (s=0;s<stages.length;s++){
 		    run("Set Scale...", "distance=1 known=" + new_micron_width + " unit=microns");
 		    rename("scaled.tif");
 		    
-		    setBatchMode(false);
-		    // Get image dimensions
-			w = getWidth();
-			h = getHeight();
+		    if (live_imaging and cond!="s001"){
+		    	continue; //Skip metadata for live image frames s002 onwards
+		    else{
 		    
-		    //Rotate the embryo based on line provided by user
-		    run("Clear Results");
-		    setTool("line");
-			waitForUser("Manual Axis", "Draw a line representing the centre of the embryo, from posterior to anterior. \nImage: " + file_name);
-			run("Measure");
-			// Grab the angle from the last row of the Results table
-			angle = getResult("Angle", nResults - 1);
-			new_angle = angle - 90;
-			run("Rotate... ", "angle="+new_angle+" grid=0 interpolation=Bilinear");
-			
-			
-			//Locate top of embryo
-			run("Clear Results");
-			setTool("point");
-			waitForUser("Locate anterior", "Draw a point representing the top anterior of the extraembryonic region \nImage: " + file_name);
-			run("Measure");
-			ant_x = getResult("X", nResults - 1);
-	        ant_y = getResult("Y", nResults - 1);
-			
-			
-			//Fit ellipse
-			run("Clear Results");
-			setTool("oval");
-			waitForUser("Fit ellipse", "Draw an ellipse fitting the blood islands \nImage: " + file_name);
-			run("Measure");
-			ell_x = getResult("X", nResults - 1);
-			ell_y = getResult("Y", nResults - 1);
-			ell_w = getResult("Width", nResults - 1);
-			ell_h = getResult("Height", nResults - 1);
-			
-			if (!File.exists(csv_path)) {
-			    File.append("Stage,n,Condition,Angle,Width,Height,Anterior_X,Anterior_Y,Ellipse_X,Ellipse_Y,Ellipse_W,Ellipse_H", csv_path);
-			}
-			
-			// Append the data for this embryo
-			if (cond.length()>0){
-				cond2 = substring(cond,1,cond.length());
-			} else{
-				cond2 = cond;
-			}
-			File.append(stage + "," + n + "," +cond2+ ","+ new_angle + "," + w + "," + h + ","+ant_x+","+ant_y+","+ell_x+","+ell_y+","+ell_w+","+ell_h, csv_path);
-			
+			    setBatchMode(false);
+			    // Get image dimensions
+				w = getWidth();
+				h = getHeight();
+			    
+			    //Rotate the embryo based on line provided by user
+			    run("Clear Results");
+			    setTool("line");
+				waitForUser("Manual Axis", "Draw a line representing the centre of the embryo, from posterior to anterior. \nImage: " + file_name);
+				run("Measure");
+				// Grab the angle from the last row of the Results table
+				angle = getResult("Angle", nResults - 1);
+				new_angle = angle - 90;
+				run("Rotate... ", "angle="+new_angle+" grid=0 interpolation=Bilinear");
+				
+				
+				//Locate top of embryo
+				run("Clear Results");
+				setTool("point");
+				waitForUser("Locate anterior", "Draw a point representing the top anterior of the extraembryonic region \nImage: " + file_name);
+				run("Measure");
+				ant_x = getResult("X", nResults - 1);
+		        ant_y = getResult("Y", nResults - 1);
+				
+				
+				//Fit ellipse
+				run("Clear Results");
+				setTool("oval");
+				waitForUser("Fit ellipse", "Draw an ellipse fitting the blood islands \nImage: " + file_name);
+				run("Measure");
+				ell_x = getResult("X", nResults - 1);
+				ell_y = getResult("Y", nResults - 1);
+				ell_w = getResult("Width", nResults - 1);
+				ell_h = getResult("Height", nResults - 1);
+				
+				if (!File.exists(csv_path)) {
+				    File.append("Stage,n,Condition,Angle,Width,Height,Anterior_X,Anterior_Y,Ellipse_X,Ellipse_Y,Ellipse_W,Ellipse_H", csv_path);
+				}
+				
+				// Append the data for this embryo
+				if (cond.length()>0){
+					cond2 = substring(cond,1,cond.length());
+				} else{
+					cond2 = cond;
+				}
+				File.append(stage + "," + n + "," +cond2+ ","+ new_angle + "," + w + "," + h + ","+ant_x+","+ant_y+","+ell_x+","+ell_y+","+ell_w+","+ell_h, csv_path);
+			    
+		    }
+		    
 			run("Select None");
 			
 			run("Brightness/Contrast...");
