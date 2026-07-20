@@ -1,11 +1,12 @@
-import analysis
 import pandas as pd
 import numpy as np
-from config import processed_path
 import matplotlib.pyplot as plt
-import database
 import networkx as nx
-import analysis
+
+import algorithms.database as database
+import algorithms.analysis as analysis
+from config import processed_path
+
 
 def degree_distribution_graph(embryo_ID):
     nodes_path = processed_path / "skeleton_networks"

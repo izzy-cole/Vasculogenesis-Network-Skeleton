@@ -5,8 +5,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from config import processed_path, microns_per_pixel, main_image_path
-import analysis
-import database
+import algorithms.analysis as analysis
+import algorithms.database as database
 
 
 def find_area(image):

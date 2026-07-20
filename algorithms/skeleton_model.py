@@ -3,9 +3,10 @@ import numpy as np
 import pandas as pd
 import tifffile as tiff
 from pathlib import Path
-from config import processed_path
 import os
-import database
+
+import algorithms.database as database
+from config import processed_path
 from config import microns_per_pixel, base_merge, sensitivity_merge, col_threshold, conditions
 
 def find_pixel_neighbours(image,x,y):

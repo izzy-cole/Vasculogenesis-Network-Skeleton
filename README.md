@@ -1,93 +1,42 @@
 # Vasculogenesis-Network-Skeleton
 
+Custom image processing and network analysis tool designed to quantify network formation and structure of blood islands in chicken embryos.
 
 
 
 
 
+**Features**
 
-**Skeleton\_analysis\_all\_n.ipynb**
+1. **Adaptive image segmentation: uses local Bernsen thresholding to generate high quality blood island segmentation with minimal manual input, adapting to variable image contrast.**
 
-Runs the model from skeleton\_model.py on the dataset and saves it
+**2. Network model setup and a custom node-merging algorithm to ensure network structures are biologically significant.**
 
-Merged with skeleton\_analysis\_drugs.ipynb
+**3. Dataset handling via an embryo\_ID system allows for unambiguous, high-throughput processing of standard and drug experiment datasets.**
 
+**4. Plotting and visualisation code including tracking feature changes through development, spatial grid analysis, and area analysis.**
 
-
-**Skeleton\_analysis\_results\_all\_n.ipynb**
-
-Runs code to generate analysis statistics and then generate graphical plots
-
-\- Merge with \_drugs\_brendan, \_drugs
+**5. Under development: support for image stacks, to track network features for live time-lapse imaging.**
 
 
 
+**Installation and use**
 
-**Skeleton\_analysis\_results\_spatial.ipynb**
+```bash
 
-calc\_degrees
+git clone \[https://github.com/yourusername/vasculogenesis-modeling.git](https://github.com/yourusername/vasculogenesis-modeling.git)
 
-rotate\_nodes
+cd vasculogenesis-modeling
 
-rotate\_all\_nodes
+pip install -r requirements.txt
 
+Run the image editing and preprocessing script skeleton.ijm via Fiji/ImageJ
 
+Set up file paths in config.py
 
-**Skeleton\_analysis\_visualisation.ipynb**
+Run run\_skeleton\_model.ipynb to initialise the network model, then view analytics via skeleton\_analysis\_results.ipynb
 
-Various notebook code to call from visualisation.py
-
-
-
-
-
-
-
-**analysis.py**
-
-mean\_line
-
-plot\_feature
-
-plot\_feature\_drugs
-
-violins
-
-gen\_networkx\_graph
-
-
-
-**visualisation.py**
-
-image\_plot
-
-nodes\_plot
-
-
-
-**Skeleton\_model.py**
-
-find\_pixel\_neighbours
-
-traverse
-
-coords\_to\_id
-
-nodes\_edges\_from\_image
-
-get\_node\_adjacencies
-
-merge\_nearby\_nodes
-
-form\_networks\_all
-
-
-
-
-
-Removed:
-
-visualise\_image
+See the full guide.md for detailed information on parameter setup.
 
 
 

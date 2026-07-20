@@ -1,0 +1,4 @@
+Embryo_ID,Number of Nodes,Mean Edge Length,Mean Node Weight,Average Degree of Non-Isolated Nodes,Number of Basis Cycles,Number of Components,Average Clustering,Average Shortest Path,Number of Isolated Nodes,"Number of Components, Excluding Isolated Nodes",Proportion of Isolated Nodes,"Mean Edge Length, Standardised"
+1,825,58.62162162162162,3.679330556484848,1.3724884080370943,19,400,0.004646465,531.8069381598793,178,222,0.21575757575757576,0.016447528063168213
+2,844,82.55210237659963,5.578074576303317,1.5763688760806915,39,336,0.008293839,2242.6552283793185,150,186,0.17772511848341233,0.018752294826406477
+,,,,,,,,,,,,

@@ -5,9 +5,9 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import os
-import database
 import seaborn as sns
 
+import algorithms.database as database
 from config import processed_path, microns_per_pixel
 
 def initialise_summary():
