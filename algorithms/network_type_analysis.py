@@ -44,7 +44,6 @@ def clustering_graph(embryo_ID):
 
     G = analysis.gen_networkx_graph(nodes,adj)
     nodes["clustering"] = nx.clustering(G)
-    nodes = analysis.calc_degrees(nodes,adj)
     
     plt.hist(nodes["clustering"],bins=50)
 
@@ -56,7 +55,33 @@ def clustering_graph(embryo_ID):
     plt.title(f"Clustering Coefficient Distribution of a HH{int(stage)} Embryo")
 
 
+def clustering_component_graph(embryo_ID):
+    nodes_path = processed_path / "skeleton_networks"
+    nodes = pd.read_csv(nodes_path / f"{embryo_ID}_nodes.csv", index_col = 0)
+    adj = pd.read_csv(nodes_path / f"{embryo_ID}_adj.csv", index_col = 0)
+    adj.columns = adj.columns.astype(int)
+    
+
+    G = analysis.gen_networkx_graph(nodes,adj)
+
+    largest_c = max(nx.connected_components(G), key=len)
+    S = G.subgraph(largest_c).copy()
+    print(S)
+
+    plt.hist(nx.clustering(S).values(),bins=50)
+
+    plt.xlabel("Clustering Coefficient")
+    plt.ylabel("Total Nodes")
+
+    metadata_df = database.initialise_metadata()
+    stage = metadata_df.loc[embryo_ID,"Stage"]
+    plt.title(f"Clustering Coefficient Distribution of a HH{int(stage)} Embryo")
+
+
+
 def edge_length_graph(embryo_ID):
+    nodes_path = processed_path / "skeleton_networks"
+
     adj = pd.read_csv(nodes_path / f"{embryo_ID}_adj.csv", index_col = 0)
     adj.columns = adj.columns.astype(int)
     
@@ -111,8 +136,6 @@ def edge_whole_percentile_graph(embryo_ID,embryo_ID_list):
         else:
             count = edge_weights[edge_percentiles[i-1]<=edge_weights]
             count = len(count<=edge_percentiles[i])
-        print(count)
-        print(len(nodes))
         edge_dist.append(count/len(nodes))
 
     percentiles2 = np.arange(0,110,10)
