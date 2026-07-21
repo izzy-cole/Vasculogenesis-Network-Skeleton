@@ -44,14 +44,28 @@ def get_embryo_IDs_from_condition(condition=np.nan,stages=[]):
 
     return filtered_df.index.values
 
-def register_embryos_from_imageJ(drug=np.nan,exp_date=np.nan):
+def get_embryo_IDs_from_drug(drug=np.nan,stages=[]):
+    metadata_df = initialise_metadata()
+    if pd.isna(drug):
+        filtered_df = metadata_df[pd.isna(metadata_df["Drug"])]
+    else:
+        filtered_df =  metadata_df[metadata_df["Drug"]==drug]
+
+    if len(stages)>0:
+        filtered_df = filtered_df[filtered_df["Stage"].isin(stages)]
+
+    return filtered_df.index.values
+
+def register_embryos_from_imageJ(drug=np.nan,exp_date=np.nan,live=None):
     metadata_df = initialise_metadata()
     #Generates database from .csv files provided by the ImageJ macro skeleton.ijm
     append_count = 0
     skip_count = 0
 
     #Define the file path
-    if pd.isna(drug)  and pd.isna(exp_date):
+    if live:
+        file = Path(imagej_metadata_path / "imageJ_metadata_live.csv")
+    elif pd.isna(drug)  and pd.isna(exp_date):
         file = Path(imagej_metadata_path / "imageJ_metadata.csv")
     else:
         file = Path(imagej_metadata_path / f"{exp_date}_{drug}_imageJ_metadata.csv")

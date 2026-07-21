@@ -131,7 +131,7 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None):
     master_df = load_master_df()
 
     #display only a subset of embryos if chosen
-    if embryo_ID_list != None:
+    if embryo_ID_list is not None:
         master_df = master_df.loc[embryo_ID_list]
 
     #remove any empty feature data (e.g. no cycles present)
@@ -145,7 +145,7 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None):
         plt.ylabel(f"{feature} in $\\mu m$")
         plt.ylim(bottom=0)
 
-    if title is not None:
+    if title !="":
         plt.title(f"{title} Per Embryo")
         #plt.savefig(f'results/skeleton/main_figs_svgs/{title}.svg', transparent=True, dpi=300)
     else:

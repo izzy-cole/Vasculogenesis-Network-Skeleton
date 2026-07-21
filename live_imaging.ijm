@@ -2,7 +2,7 @@
 stage=11;
 n=1;
 
-record_metadata=false;
+record_metadata=true;
 
 
 main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/live_imaging/";
