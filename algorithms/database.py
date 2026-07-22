@@ -7,12 +7,17 @@ from pathlib import Path
 
 def initialise_metadata():
     #open the metadata file, or create one, if it doesn't exist
-    file = Path(processed_path / "metadata.csv")
+    file = Path(processed_path / "metadata.csv",dtype={"Experiment_Date":str, "Stage":str, "Drug":str})
     if file.exists():
         metadata_df = pd.read_csv(file,index_col="Embryo_ID")
     else:
         metadata_df = pd.DataFrame(columns = ["Stage","n","Condition","Drug","Experiment_Date","Angle","Width","Height","Anterior_X","Anterior_Y","Ellipse_X","Ellipse_Y","Ellipse_W","Ellipse_H"])
     metadata_df.index.name = "Embryo_ID"
+
+    #Fix any dates stored as floating points
+    metadata_df["Experiment_Date"] = (
+        metadata_df["Experiment_Date"].astype(str).str.replace(r"\.0$", "", regex=True)
+    )
     return metadata_df
 
 def get_embryo_ID(stage,n,condition=None):
@@ -32,6 +37,7 @@ def get_embryo_ID(stage,n,condition=None):
         print("Error: multiple embryos defined with the same (stage,n,condition) tuple.")
         return -1 
 
+#Think this is unused? Delete?
 def get_embryo_IDs_from_condition(condition=np.nan,stages=[]):
     metadata_df = initialise_metadata()
     if pd.isna(condition):
@@ -44,15 +50,19 @@ def get_embryo_IDs_from_condition(condition=np.nan,stages=[]):
 
     return filtered_df.index.values
 
-def get_embryo_IDs_from_drug(drug=np.nan,stages=[]):
+def get_embryo_IDs_from_drug(drug=np.nan,stages=[],date=None):
     metadata_df = initialise_metadata()
     if pd.isna(drug):
+        #Return the "no drugs" data
         filtered_df = metadata_df[pd.isna(metadata_df["Drug"])]
     else:
         filtered_df =  metadata_df[metadata_df["Drug"]==drug]
 
+    #Apply further filters on stages and date
     if len(stages)>0:
         filtered_df = filtered_df[filtered_df["Stage"].isin(stages)]
+    if date is not None:
+        filtered_df = filtered_df[filtered_df["Experiment_Date"]==date]
 
     return filtered_df.index.values
 

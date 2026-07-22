@@ -126,7 +126,7 @@ def plot_feature_by_stage(feature,title="",embryo_ID_list=None):
 
     plt.show()
 
-def plot_feature_by_condition(feature,title=None,embryo_ID_list=None):
+def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_order=None):
 
     master_df = load_master_df()
 
@@ -136,6 +136,22 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None):
 
     #remove any empty feature data (e.g. no cycles present)
     master_df = master_df.dropna(subset=[feature])
+
+    #Sort condition ordering
+    if condition_order is not None:
+
+        #Replace "um" with the mu symbol
+        for i in master_df.index:
+            if master_df.loc[i,"Condition"].find("um")!=-1:
+                master_df.loc[i,"Condition"] = master_df.loc[i,"Condition"].replace("um", " $ \mu m $")
+        for i in range(len(condition_order)):
+            if condition_order[i].find("um")!=-1:
+                condition_order[i] = condition_order[i].replace("um", " $ \mu m $")
+    
+        #Convert conditiont to a categorial datatype, allowing it to be ordered
+        master_df["Condition"] = pd.Categorical(master_df["Condition"], categories=condition_order, ordered=True)
+        master_df = master_df.sort_values("Condition")
+
     sns.lineplot(data=master_df, x="Condition",y=feature, linewidth=2.5)
     plt.title(feature)
     
