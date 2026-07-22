@@ -3,7 +3,7 @@
 Custom image processing and network analysis tool designed to quantify network formation and structure of blood islands in chicken embryos.
 
 <p align="center">
-  <img src="demo_data/no_labels.png.png" width="80%" title="Raw image, skeletonisation, and network model setup">
+  <img src="demo_data/no_labels.png" width="80%" title="Raw image, skeletonisation, and network model setup">
 </p>
 
 
@@ -11,7 +11,7 @@ Custom image processing and network analysis tool designed to quantify network f
 
 **Features**
 
-1. **Adaptive image segmentation: uses local Bernsen thresholding to generate high quality blood island segmentation with minimal manual input, adapting to variable image contrast.**
+**1. Adaptive image segmentation: uses local Bernsen thresholding to generate high quality blood island segmentation with minimal manual input, adapting to variable image contrast.**
 
 **2. Network model setup and a custom node-merging algorithm to ensure network structures are biologically significant.**
 
@@ -23,8 +23,8 @@ Custom image processing and network analysis tool designed to quantify network f
 
 
 <p align="center">
-  <img src="example_figs/proportion_isolated.png" width="40%" title="Proportion of isolated nodes graph">
-  <img src="example_figs/connectivity.png" width="40%" title="Spatial differences in connectivity graph">
+  <img src="demo_data/proportion_isolated.png" width="40%" title="Proportion of isolated nodes graph">
+  <img src="demo_data/connectivity.png" width="40%" title="Spatial differences in connectivity graph">
 </p>
 
 
