@@ -2,6 +2,9 @@
 
 Custom image processing and network analysis tool designed to quantify network formation and structure of blood islands in chicken embryos.
 
+<p align="center">
+  <img src="demo_data/no_labels.png.png" width="80%" title="Raw image, skeletonisation, and network model setup">
+</p>
 
 
 
@@ -16,25 +19,33 @@ Custom image processing and network analysis tool designed to quantify network f
 
 **4. Plotting and visualisation code including tracking feature changes through development, spatial grid analysis, and area analysis.**
 
-**5. Under development: support for image stacks, to track network features for live time-lapse imaging.**
+**5. Support for image stacks, to track network features for live time-lapse imaging.**
 
+
+<p align="center">
+  <img src="example_figs/proportion_isolated.png" width="40%" title="Proportion of isolated nodes graph">
+  <img src="example_figs/connectivity.png" width="40%" title="Spatial differences in connectivity graph">
+</p>
 
 
 **Installation and use**
 
 ```bash
 
-git clone \[https://github.com/yourusername/vasculogenesis-modeling.git](https://github.com/yourusername/vasculogenesis-modeling.git)
-
-cd vasculogenesis-modeling
+git clone git@github.com:izzy-cole/Vasculogenesis-Network-Skeleton.git
+cd Vasculogenesis-Network-Skeleton
 
 pip install -r requirements.txt
 
-Run the image editing and preprocessing script skeleton.ijm via Fiji/ImageJ
+```
+
+Run the image preprocessing script *skeleton.ijm* via Fiji/ImageJ
 
 Set up file paths in config.py
 
-Run run\_skeleton\_model.ipynb to initialise the network model, then view analytics via skeleton\_analysis\_results.ipynb
+Run *run\_skeleton\_model.ipynb* to initialise the network model on your dataset
+
+View analytics via *skeleton\_analysis\_results.ipynb*
 
 See the full guide.md for detailed information on parameter setup.
 
