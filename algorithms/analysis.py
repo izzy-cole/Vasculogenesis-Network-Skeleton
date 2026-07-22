@@ -98,7 +98,7 @@ def load_master_df():
     return master_df
 
 #Could combine stage/condition function
-def plot_feature_by_stage(feature,title="",embryo_ID_list=None):
+def plot_feature_by_stage(feature,title="",embryo_ID_list=None,save_path=None):
 
     master_df = load_master_df()
 
@@ -117,6 +117,7 @@ def plot_feature_by_stage(feature,title="",embryo_ID_list=None):
         plt.ylabel(f"{feature} in $\\mu m$")
         plt.ylim(bottom=0)
 
+    #Use the title provided, or if left blank, use the default feature name
     if title!="":
         plt.title(f"{title} Per Embryo")
         #plt.savefig(f'results/skeleton/main_figs_svgs/{title}.svg', transparent=True, dpi=300)
@@ -124,9 +125,19 @@ def plot_feature_by_stage(feature,title="",embryo_ID_list=None):
         plt.title(f"{feature} Per Embryo")
         #plt.savefig(f'results/skeleton/main_figs_svgs/{feature}.svg', transparent=True, dpi=300)
 
+    if save_path is not None:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        if title!="":
+            plt.savefig(save_path / f"{title}.svg", transparent=True,dpi=300)
+            plt.savefig(save_path / f"{title}.png", transparent=True,dpi=300)
+        else:
+            plt.savefig(save_path / f"{feature}.svg", transparent=True,dpi=300)
+            plt.savefig(save_path / f"{feature}.png", transparent=True,dpi=300)
+
     plt.show()
 
-def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_order=None):
+def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_order=None,save_path=None):
 
     master_df = load_master_df()
 
@@ -163,10 +174,18 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_o
 
     if title !="":
         plt.title(f"{title} Per Embryo")
-        #plt.savefig(f'results/skeleton/main_figs_svgs/{title}.svg', transparent=True, dpi=300)
     else:
         plt.title(f"{feature} Per Embryo")
-        #plt.savefig(f'results/skeleton/main_figs_svgs/{feature}.svg', transparent=True, dpi=300)
+
+    if save_path is not None:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        if title!="":
+            plt.savefig(save_path / f"{title}.svg", transparent=True,dpi=300)
+            plt.savefig(save_path / f"{title}.png", transparent=True,dpi=300)
+        else:
+            plt.savefig(save_path / f"{feature}.svg", transparent=True,dpi=300)
+            plt.savefig(save_path / f"{feature}.png", transparent=True,dpi=300)
 
     plt.show()
    
