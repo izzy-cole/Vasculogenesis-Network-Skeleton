@@ -4,6 +4,7 @@ Custom image processing and network analysis tool designed to quantify network f
 
 <p align="center">
   <img src="demo_data/no_labels.png" width="80%" title="Raw image, skeletonisation, and network model setup">
+  <br>
   <em>Automated pipeline workflow: Raw microscope image (left) → Skeletonisation (center) → Abstracted network model with extracted nodes and edges (right).</em>
 </p>
 
