@@ -11,15 +11,12 @@ import algorithms.database as database
 from config import processed_path, microns_per_pixel
 
 def initialise_summary():
-    properties = ["Number of Nodes","Mean Edge Length","Mean Node Weight","Average Degree of Non-Isolated Nodes","Number of Basis Cycles",
-                  "Number of Components","Average Clustering","Average Shortest Path", "Number of Isolated Nodes",
-                  "Number of Components, Excluding Isolated Nodes","Proportion of Isolated Nodes"]
     #open the summary file, or create one, if it doesn't exist
     file = Path(processed_path / "summary.csv")
     if file.exists():
         summary_df = pd.read_csv(file,index_col="Embryo_ID")
     else:
-        summary_df = pd.DataFrame(columns = properties)
+        summary_df = pd.DataFrame()
     summary_df.index.name = "Embryo_ID"
     return summary_df
 
@@ -39,6 +36,7 @@ def register_skeleton_summary_data():
 
          #Get embryo ID
          embryo_ID, end = file_name.split("_")
+         embryo_ID = int(embryo_ID)
          if end=="nodes.csv":
 
             #check if already in databse
@@ -76,13 +74,19 @@ def register_skeleton_summary_data():
                 except:
                     print("Error collecting clustering data")
 
+                metadata_df = database.initialise_metadata()
+                w = float(metadata_df.loc[embryo_ID, "Ellipse_W"])
+                h = float(metadata_df.loc[embryo_ID, "Ellipse_H"])
+                area = (np.pi * w/2 * h/2)
+
 
                 summary_df.loc[embryo_ID,"Number of Components, Excluding Isolated Nodes"] = summary_df.loc[embryo_ID,"Number of Components"] - summary_df.loc[embryo_ID,"Number of Isolated Nodes",]
-                summary_df.loc[embryo_ID,"Proportion of Isolated Nodes"] = summary_df.loc[embryo_ID,"Number of Isolated Nodes"] / summary_df.loc[embryo_ID,"Number of Nodes"]
-
-                xmin = nodes["x"].quantile(0.01)
-                xmax = nodes["x"].quantile(0.99)
-                summary_df.loc[embryo_ID,"Mean Edge Length, Standardised"] = summary_df.loc[embryo_ID,"Mean Edge Length"]/ (microns_per_pixel*(xmax-xmin))
+                summary_df.loc[embryo_ID,"Number of Isolated Nodes / Nodes"] = summary_df.loc[embryo_ID,"Number of Isolated Nodes"] / summary_df.loc[embryo_ID,"Number of Nodes"]
+                summary_df.loc[embryo_ID,"Mean Edge Length / Width"] = summary_df.loc[embryo_ID,"Mean Edge Length"]/ w
+                
+                summary_df.loc[embryo_ID,"Number of Nodes / Area"] = len(nodes) / area
+                summary_df.loc[embryo_ID,"Basis Cycles / Area"] = len(sorted(nx.cycle_basis(G))) / area
+                summary_df.loc[embryo_ID,"Isolated Nodes / Area"] =  summary_df.loc[embryo_ID,"Number of Isolated Nodes"] / area
 
                 save_summary(summary_df)
     return summary_df

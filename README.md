@@ -13,7 +13,7 @@ Custom image processing and network analysis tool designed to quantify network f
 
 ## Features
 
-**1. Adaptive image segmentation:** uses local Bernsen thresholding to generate high quality blood island segmentation with minimal manual input, adapting to variable image contrast.**
+**1. Adaptive image segmentation:** uses local Bernsen thresholding to generate high quality blood island segmentation with minimal manual input, adapting to variable image contrast.
 
 **2. Network model setup:** with a custom node-merging algorithm to ensure network structures are biologically significant.
 
@@ -21,7 +21,7 @@ Custom image processing and network analysis tool designed to quantify network f
 
 **4. Plotting and visualisation code:** including tracking feature changes through development, spatial grid analysis, and area analysis.
 
-**5. Support for live imaging:** via stack processing to track network features for video or time-lapse imaging.**
+**5. Support for live imaging:** via stack processing to track network features for video or time-lapse imaging.
 
 ## Example outputs
 
