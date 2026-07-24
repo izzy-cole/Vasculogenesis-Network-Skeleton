@@ -20,14 +20,28 @@ def initialise_metadata():
     )
     return metadata_df
 
-def get_embryo_ID(stage,n,condition=None):
-    metadata_df = initialise_metadata()
+def get_embryo_ID(stage,n,condition=None,drug=None,metadata_df=None,date=None):
+    if metadata_df is None:
+        metadata_df = initialise_metadata()
+
+    mask = (metadata_df["Stage"]==stage) & (metadata_df["n"]==n)
+    
     #Find a match for the embryo ID from the (stage,n,condition) data
     if condition == None or pd.isna(condition):
-        index = metadata_df[(metadata_df["Stage"]==stage) & (metadata_df["n"]==n) & (pd.isna(metadata_df["Condition"]))].index
+        mask = mask & (pd.isna(metadata_df["Condition"]))
     else:
-        index = metadata_df[(metadata_df["Stage"]==stage) & (metadata_df["n"]==n) & (metadata_df["Condition"]==condition)].index
+        mask = mask & (metadata_df["Condition"]==condition)
 
+    if pd.isna(drug) or drug==None:
+        mask = mask & (pd.isna(metadata_df["Drug"]))
+    else:
+        mask = mask & (metadata_df["Drug"]==drug)
+
+    if date is not None and not pd.isna(date):
+        mask = mask & (metadata_df["Experiment_Date"] == date)
+
+    index = metadata_df[mask].index
+    
     #return -1 if not found
     if len(index)==0:
         return -1
@@ -94,9 +108,10 @@ def register_embryos_from_imageJ(drug=np.nan,exp_date=np.nan,live=None):
             row = imageJ_metadata.loc[i]
 
             if "Condition" in row.index:
-                id = get_embryo_ID(row["Stage"], row["n"], row["Condition"])
+                #Pass in the metadata to avoid duplicating the same row before saving
+                id = get_embryo_ID(row["Stage"], row["n"], row["Condition"],row["Drug"],metadata_df=metadata_df)
             else:
-                id = get_embryo_ID(row["Stage"], row["n"])
+                id = get_embryo_ID(row["Stage"], row["n"],metadata_df=metadata_df)
 
             if id == -1: #This embryo is not yet in the database, so add it
                 append_count +=1

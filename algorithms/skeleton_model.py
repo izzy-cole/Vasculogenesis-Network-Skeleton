@@ -188,7 +188,7 @@ def merge_nearby_nodes(nodes,adj):
             #print(f"skipping {a} - it has been deleted")
     return nodes,adj
 
-def form_networks_all(path,skips=[]):
+def form_networks_all(path,skips=[],drug=None):
 
     nodes_list = []
     adj_list = []
@@ -201,8 +201,8 @@ def form_networks_all(path,skips=[]):
             data = data.split("_")
             if len(data)==2:
                 stage, n = data
-                stage = int(stage[2:]) #Remove "hh"
-                n = int(n[1:]) #Remove "n"
+                stage = int(stage[2:]) #Remove "hh" label
+                n = int(n[1:]) #Remove "n" label
                 condition = np.nan
                 skel = tiff.imread(path / f"hh{stage}_n{n} skeleton.tif")
                 dists = tiff.imread(path / f"hh{stage}_n{n} distmap.tif")
@@ -220,7 +220,10 @@ def form_networks_all(path,skips=[]):
                 print(f"Skipping {file_name}")
                 continue
 
-            embryo_ID = database.get_embryo_ID(stage,n,condition)
+            if drug is None:
+                embryo_ID = database.get_embryo_ID(stage,n)
+            else:
+                embryo_ID = database.get_embryo_ID(stage,n,condition,drug=drug)
 
             #form save directory if it doesnt exist yet
             save_dir = processed_path / "skeleton_networks"

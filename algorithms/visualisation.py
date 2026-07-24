@@ -19,7 +19,8 @@ def image_plot(image,size,x_min=0,y_min=0):
 def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_weights=False,node_weights=False,x_min=0,y_min=0):
     #show skeleton
     fig,ax=plt.subplots(figsize=(10,10))
-    ax.imshow(image,cmap=plt.cm.gray,alpha=im_alpha)
+    if image is not None:
+        ax.imshow(image,cmap=plt.cm.gray,alpha=im_alpha)
     ax.axis('off') 
 
     x_max,y_max = x_min+size[0],y_min+size[1]
