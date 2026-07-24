@@ -88,7 +88,7 @@ def register_embryos_from_imageJ(drug=np.nan,exp_date=np.nan,live=None):
 
     #Define the file path
     if live:
-        file = Path(imagej_metadata_path / "imageJ_metadata_live.csv")
+        file = Path(imagej_metadata_path / f"imageJ_metadata_{drug}.csv")
     elif pd.isna(drug)  and pd.isna(exp_date):
         file = Path(imagej_metadata_path / "imageJ_metadata.csv")
     else:

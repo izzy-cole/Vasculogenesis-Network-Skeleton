@@ -141,9 +141,10 @@ def plot_feature_by_stage(feature,title="",embryo_ID_list=None,save_path=None):
 
     plt.show()
 
-def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_order=None,save_path=None):
+def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_order=None,save_path=None,live=False):
 
     master_df = load_master_df()
+    drug = master_df.loc[int(embryo_ID_list[0]),"Drug"]
 
     #display only a subset of embryos if chosen
     if embryo_ID_list is not None:
@@ -170,16 +171,27 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_o
     sns.lineplot(data=master_df, x="Condition",y=feature, linewidth=2.5)
     plt.title(feature)
     
+    if live:
+        plt.xlabel(f"Time Frame")
+        ticks = np.arange(1,len(master_df.index)+1,int(len(master_df.index)/10))
+        plt.xticks(ticks,ticks)
+        if title!="":
+            plt.title(f"Live Imaging: {title} Over Time")
+        else:
+            plt.title(f"Live Imaging: {feature} Over Time")
+    else:
+        plt.xlabel(f"{drug} Condition")
 
-    plt.xlabel("HH Stage")
+        if title !="":
+            plt.title(f"{drug}: {title} Per Embryo")
+        else:
+            plt.title(f"{drug}: {feature} Per Embryo")
+
+
     if feature== "Mean Edge Length":
         plt.ylabel(f"{feature} in $\\mu m$")
         plt.ylim(bottom=0)
-
-    if title !="":
-        plt.title(f"{title} Per Embryo")
-    else:
-        plt.title(f"{feature} Per Embryo")
+    
 
     if save_path is not None:
         if not os.path.exists(save_path):

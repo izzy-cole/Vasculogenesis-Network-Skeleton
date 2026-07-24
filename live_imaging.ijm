@@ -4,10 +4,10 @@ n=1;
 
 record_metadata=true;
 
-
+live_name = "1";
 main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/live_imaging/";
 save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/live_imaging/hh"+stage+"_n"+n+"/";
-csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/imageJ_metadata_live.csv";
+csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/imageJ_metadata_live" + live_name + ".csv";
 
 //spatial resolution: number of pixels per micron
 pix_micron_ratio = 0.25;

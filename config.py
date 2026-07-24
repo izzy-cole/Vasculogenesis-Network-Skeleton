@@ -1,13 +1,22 @@
 from pathlib import Path
 
-data_path = Path("demo_data/")
+#Demo set
+#data_path = Path("demo_data/")
+#imagej_metadata_path = data_path
+#main_image_path = data_path / "preprocessed"
+#drugs_image_path = ""
+#results_path = data_path
 
-imagej_metadata_path = data_path 
+#Main set
+data_path = Path("C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/")
 
-main_image_path = data_path / "preprocessed"
-drugs_image_path = ""
+imagej_metadata_path = data_path / "imagej"
+main_image_path = data_path / "raw" / "main" 
+drugs_image_path = data_path / "raw" / "drugs" 
+live_imaging_path =  data_path / "raw" / "live_imaging"
 
 processed_path = data_path / "processed" 
+results_path = Path("C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/skeleton/results/")
 
 
 #spatial resolution: number of pixels per micron
