@@ -96,6 +96,13 @@ def coords_to_id(coord_to_id_dict, x, y):
 
 def nodes_edges_from_image(image,dists):
 
+    # Make a copy and zero out the outer border pixels
+    image = image.copy()
+    image[0, :] = 0
+    image[-1, :] = 0
+    image[:, 0] = 0
+    image[:, -1] = 0
+
     nodes = pd.DataFrame(data=None, columns=["x","y","type","weight"]) #main datastructure
     #pix_neighbours = pd.Series(data=None) #keep temp track of white pixel neighbours
     pix_neighbours = []
@@ -151,7 +158,8 @@ def nodes_edges_from_image(image,dists):
             x2,y2 = path[-1]
             id2 = coords_to_id(coord_to_id_dict,x2,y2)
             #set the adjacency value as the length of the path in microns
-            adj.loc[id1,id2] = (len(path)-1)*microns_per_pixel#subtract one because the path includes both start and end points
+            if id2 is not None:
+                adj.loc[id1,id2] = (len(path)-1)*microns_per_pixel#subtract one because the path includes both start and end points
 
     return nodes,adj
 
@@ -246,7 +254,7 @@ def form_networks_all(path,skips=[],drug=None):
 
             #save file not found, so run the skeleton model
             if not (save_dir / f"{embryo_ID}_nodes.csv").exists() or not (save_dir / f"{embryo_ID}_adj.csv").exists:
-                print(f"No existing file found for image HH{stage}, n{n} {condition}. Embryo ID: {embryo_ID}. Procesing now.")
+                print(f"No existing file found for image HH{stage}, n{n} {condition}. Embryo ID: {embryo_ID}. Processing now.")
 
                 height = len(skel)
                 width = len(skel[0])
