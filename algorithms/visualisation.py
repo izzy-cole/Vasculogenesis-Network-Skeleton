@@ -19,7 +19,7 @@ def image_plot(image,size,x_min=0,y_min=0):
 
     plt.show()
 
-def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_weights=False,node_weights=False,x_min=0,y_min=0,node_scaling=1):
+def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_weights=False,node_weights=False,x_min=0,y_min=0,node_scaling=1,edge_scaling=1):
     fig,ax=plt.subplots(figsize=(10,10))
     x_max,y_max = x_min+size[0],y_min+size[1]
 
@@ -29,7 +29,8 @@ def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_
     else:
         print("No image")
         ax.set_facecolor("black")
-    ax.axis('off') 
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 
     #calculate nodes and edges
@@ -71,7 +72,7 @@ def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_
                         if edge_weights:
                             ax.text(av_x, av_y, str(int(dist)), ha='left', va='bottom', fontsize=20, color='white' ,font="arial",weight="bold")
 
-    lc = LineCollection(lines, colors="tab:blue", alpha=edge_alpha, linewidths=5, zorder=2)
+    lc = LineCollection(lines, colors="tab:blue", alpha=edge_alpha, linewidths=5*edge_scaling, zorder=2)
     ax.add_collection(lc)
 
     ax.set_xlim(x_min, x_max)

@@ -222,6 +222,7 @@ __marimo__/
 data/**
 results/**
 archive/**
+testing/**
 
 #Vscode
 .vscode/

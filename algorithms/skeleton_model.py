@@ -7,12 +7,13 @@ import os
 
 import algorithms.database as database
 from config import processed_path
-from config import microns_per_pixel, base_merge, sensitivity_merge, col_threshold, conditions
+from config import microns_per_pixel, base_merge, sensitivity_merge, col_threshold
 
 def find_pixel_neighbours(image,x,y):
-    #returns a list of adjacent pixels
+    #returns a list of adjacent white pixels
     white = [255*(1-col_threshold)]*3
     neighbours = []
+
     if np.all(image[y][x-1] > white):
         neighbours.append([x-1,y])
 
@@ -38,7 +39,6 @@ def find_pixel_neighbours(image,x,y):
         neighbours.append([x+1,y+1])
 
     return neighbours
-
 
 
 def traverse(pixels,nodes,path):
@@ -80,10 +80,14 @@ def traverse(pixels,nodes,path):
                 return path
             
 
-
 def coords_to_id(nodes,x,y):
    return nodes[(nodes["x"]==x) & (nodes["y"]==y)].index
 
+#Replace with ???
+#coord_to_id = {}
+#    for i in range(n):
+#        coord = (xs[i],ys[i])
+#        coord_to_id[coord] = i
 
 
 def nodes_edges_from_image(image,dists):
@@ -95,12 +99,14 @@ def nodes_edges_from_image(image,dists):
     width = len(image[0])
     pixels = []
 
+    nodes_data = []
+
     #set up the list of nodes
     n = 0
+    white = 255*(1-col_threshold)
     for x in range(1, width-1):
         for y in range(1, height-1):
-
-            if np.all(image[y][x]> [255*(1-col_threshold)]*3): #if pixel is white (within a tolerance threshold to allow for changes in colour due to compression)
+            if image[y][x]> white: #if pixel is white (within a tolerance threshold to allow for changes in colour due to compression)
                 pixels.append([x,y]) #form pixel list
                 neighbours = find_pixel_neighbours(image,x,y) #find neighbours
                 #print(f"{x,y}'s neighbours are {neighbours}")
@@ -110,18 +116,20 @@ def nodes_edges_from_image(image,dists):
 
                 if count > 2: #a junction
                     #print(f"coord {x,y} is a node with {count} neighbours and weight {weight} and adjacencies {neighbours}")
-                    type="junction"
-                    nodes.loc[n] = {"x":x,"y":y,"type":type,"weight":weight}
+
+                    nodes_data.append({"x": x, "y": y, "type": "junction", "weight": weight})
                     pix_neighbours.loc[n] = neighbours
                     n+=1
                     #print(f"junction {x,y}")
 
                 elif count <= 1: #end point or single node
-                    type="endpt"
-                    nodes.loc[n] = {"x":x,"y":y,"type":type,"weight":weight}
+                    nodes_data.append({"x": x, "y": y, "type": "endpt", "weight": weight})
+
                     pix_neighbours.loc[n] = neighbours
                     n+=1
 
+    #Build dataframe at the end (faster than .loc)
+    nodes = pd.DataFrame(nodes_data)
 
     #set up adjacency matrix     
     adj = pd.DataFrame(data=np.full((n,n),np.nan))
@@ -143,21 +151,25 @@ def nodes_edges_from_image(image,dists):
 
 def get_node_adjacencies(adj,id):
     #searches the 'id' row and returns any indexes with a nonzero value (so an adjancency)
-    return [i for i in adj.index if adj.loc[id,i]>0]
+    row = adj.loc[id]
+    return row[row>0].index.tolist()
+
 
 
 def merge_nearby_nodes(nodes,adj):
 
-    del_list = []
+    del_set = set()
     #'a' and 'b' are IDs of two nodes
     for a in nodes.index:
         #print(f"a is {a}")
         #skip the nodes already deleted
-        if a not in del_list:
+        if a not in del_set:
             xa,ya,weight = nodes[["x","y","weight"]].loc[a] #simple naming
             neighbours_a = get_node_adjacencies(adj,a)
             #print(f"a's neighbours are {neighbours_a}")
             for b in neighbours_a:
+                if b in del_set:
+                    continue
                 #print(f"b is {b}")
                 dist = adj.loc[a,b]
                 xb,yb = nodes[["x","y"]].loc[b]
@@ -168,25 +180,23 @@ def merge_nearby_nodes(nodes,adj):
                     #loop through b's adjacencies to set up a's new adjacencies
                     #print(f"b's neighbours are {neighbours_b}")
                     for c in neighbours_b:
-                        if not c==a: #do not create a self loop
+                        if c!=a and c not in del_set: #do not create a self loop
+                            bc_edge = adj.loc[b,c]
+                            ac_edge = adj.loc[a,c]
                             if adj.loc[a,c]>0: #a,c are already adjacent, so find the min distance
-                                adj.loc[a,c] = min(adj.loc[b,c],adj.loc[a,c])
-                                adj.loc[c,a] = min(adj.loc[b,c],adj.loc[a,c])
+                                adj.loc[a,c] = min(bc_edge,ac_edge)
+                                adj.loc[c,a] = min(bc_edge,ac_edge)
                             else: #a and c are not adjacent, so a inherit's b's adjacency of c
-                                adj.loc[a,c] = adj.loc[b,c]
-                                adj.loc[c,a] = adj.loc[b,c]
+                                adj.loc[a,c] = bc_edge
+                                adj.loc[c,a] = bc_edge
                     
-                    #adj = np.delete(adj,b,0)
-                    #adj =np.delete(adj,b,1)
-                    adj = adj.drop([b])
-                    adj = adj.drop([b],axis=1)
-                    nodes = nodes.drop([b])
-                    del_list.append(b)
+                    del_set.add(b)
                     #print(f"{b} has been deleted")
-        else:
-            a=1
-            #print(f"skipping {a} - it has been deleted")
+
+    nodes = nodes.drop(index=list(del_set))
+    adj = adj.drop(index=list(del_set), columns=list(del_set))
     return nodes,adj
+
 
 def form_networks_all(path,skips=[],drug=None):
 
@@ -259,6 +269,4 @@ def form_networks_all(path,skips=[],drug=None):
                 print("\n")
             else:
                 print(f"Existing file found for image HH{stage}, n{n} {condition}. Embryo ID: {embryo_ID}.")
-
-
 

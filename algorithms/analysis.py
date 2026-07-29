@@ -170,7 +170,8 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_o
 
     sns.lineplot(data=master_df, x="Condition",y=feature, linewidth=2.5)
     plt.title(feature)
-    
+
+    #Set up relevant titles and labelling
     if live:
         plt.xlabel(f"Time Frame")
         ticks = np.arange(1,len(master_df.index)+1,int(len(master_df.index)/10))
@@ -192,7 +193,7 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_o
         plt.ylabel(f"{feature} in $\\mu m$")
         plt.ylim(bottom=0)
     
-
+    #Save, if requested
     if save_path is not None:
         if not os.path.exists(save_path):
             os.makedirs(save_path)
