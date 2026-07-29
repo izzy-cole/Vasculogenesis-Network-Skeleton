@@ -245,7 +245,7 @@ def form_networks_all(path,skips=[],drug=None):
                 os.makedirs(save_dir)
 
             #save file not found, so run the skeleton model
-            if not Path(save_dir / f"{embryo_ID}_nodes.csv").exists() or not Path(save_dir / f"{embryo_ID}_adj.csv").exists:
+            if not (save_dir / f"{embryo_ID}_nodes.csv").exists() or not (save_dir / f"{embryo_ID}_adj.csv").exists:
                 print(f"No existing file found for image HH{stage}, n{n} {condition}. Embryo ID: {embryo_ID}. Procesing now.")
 
                 height = len(skel)

@@ -37,58 +37,70 @@ def register_skeleton_summary_data():
          #Get embryo ID
          embryo_ID, end = file_name.split("_")
          embryo_ID = int(embryo_ID)
-         if end=="nodes.csv":
 
+         if end=="nodes.csv":
             #check if already in databse
             if int(embryo_ID) in summary_df.index:
                 print(f"Embryo {embryo_ID} found in summary database")
                 #Todo: check if any statistics are missing, e.g. if a new column is added, then rerun the analysis.
             else:
                 print(f"Embryo {embryo_ID} not found in summary database, generating and saving statistics")
-
+                
+               
 
                 nodes = pd.read_csv(nodes_path / f"{embryo_ID}_nodes.csv", index_col = 0)
                 adj = pd.read_csv(nodes_path / f"{embryo_ID}_adj.csv", index_col = 0)
                 adj.columns = adj.columns.astype(int)
-
-                #Process properties
-                summary_df.loc[embryo_ID,"Number of Nodes"] = len(nodes)
-                summary_df.loc[embryo_ID,"Mean Edge Length"] = adj.values[adj.values>0].mean()
-                summary_df.loc[embryo_ID,"Mean Node Weight"] = np.mean(nodes["weight"])
-                summary_df.loc[embryo_ID,"Average Degree of Non-Isolated Nodes"] = count_neighbours(adj,min=1).mean()
-                summary_df.loc[embryo_ID,"Number of Isolated Nodes"] = np.array([count_neighbours(adj,min=0,max=100)==0]).sum()
-
-                G=gen_networkx_graph(nodes,adj)
-                #print(f"Network generation complete\n")
-
-                cc = nx.connected_components(G)
-                largest_cc = max(nx.connected_components(G), key=len,default=0)
-                if largest_cc!=0:
-                    G_comp = G.subgraph(largest_cc).copy()
-                    summary_df.loc[embryo_ID,"Average Shortest Path"] = nx.average_shortest_path_length(G_comp, weight='weight') #average shortest path of the largest component
-
-                summary_df.loc[embryo_ID,"Number of Basis Cycles"] = len(sorted(nx.cycle_basis(G)))
-                summary_df.loc[embryo_ID,"Number of Components"] = len(sorted(nx.connected_components(G)))
-                try:
-                    summary_df.loc[embryo_ID,"Average Clustering"] = nx.average_clustering(G)
-                except:
-                    print("Error collecting clustering data")
 
                 metadata_df = database.initialise_metadata()
                 w = float(metadata_df.loc[embryo_ID, "Ellipse_W"])
                 h = float(metadata_df.loc[embryo_ID, "Ellipse_H"])
                 area = (np.pi * w/2 * h/2)
 
+                # Generate Graph for network analysis
+                G = gen_networkx_graph(nodes, adj)
 
-                summary_df.loc[embryo_ID,"Number of Components, Excluding Isolated Nodes"] = summary_df.loc[embryo_ID,"Number of Components"] - summary_df.loc[embryo_ID,"Number of Isolated Nodes",]
-                summary_df.loc[embryo_ID,"Number of Isolated Nodes / Nodes"] = summary_df.loc[embryo_ID,"Number of Isolated Nodes"] / summary_df.loc[embryo_ID,"Number of Nodes"]
-                summary_df.loc[embryo_ID,"Mean Edge Length / Width"] = summary_df.loc[embryo_ID,"Mean Edge Length"]/ w
+                adj_arr = adj.fillna(0).values
+                adj_arr[adj_arr < 0] = 0
+                degrees = (adj_arr > 0).sum(axis=1)
+
+                num_nodes = len(nodes)
+                num_isolated = int((degrees == 0).sum())
+                num_components = len(sorted(nx.connected_components(G)))
+                num_cycles = len(sorted(nx.cycle_basis(G)))
+                mean_edge_length = adj.values[adj.values>0].mean()
+
+                components = list(nx.connected_components(G))
+                largest_cc = max(components, key=len, default=None)
+                av_shortest_path = np.nan
+                if largest_cc!=0:
+                    G_comp = G.subgraph(largest_cc)
+                    av_shortest_path = nx.average_shortest_path_length(G_comp, weight='weight') #average shortest path of the largest component
                 
-                summary_df.loc[embryo_ID,"Number of Nodes / Area"] = len(nodes) / area
-                summary_df.loc[embryo_ID,"Basis Cycles / Area"] = len(sorted(nx.cycle_basis(G))) / area
-                summary_df.loc[embryo_ID,"Isolated Nodes / Area"] =  summary_df.loc[embryo_ID,"Number of Isolated Nodes"] / area
+                row_data = {
+                "Embryo_ID": embryo_ID,
+                "Number of Nodes": num_nodes,
+                "Mean Edge Length": mean_edge_length,
+                "Mean Node Weight": float(nodes["weight"].mean()),
+                "Average Degree of Non-Isolated Nodes": count_neighbours(adj,min=1).mean(),
+                "Number of Isolated Nodes": num_isolated,
+                "Average Shortest Path": av_shortest_path, 
+                "Number of Basis Cycles": num_cycles,
+                "Number of Components": num_components,
+                "Average Clustering": nx.average_clustering(G),
+                "Number of Components, Excluding Isolated Nodes": num_components - num_isolated,
+                "Number of Isolated Nodes / Nodes": num_isolated / num_nodes if num_nodes > 0 else np.nan,
+                "Mean Edge Length / Width": mean_edge_length / w if w > 0 else np.nan,
+                "Number of Nodes / Area": num_nodes / area if area > 0 else np.nan,
+                "Basis Cycles / Area": num_cycles / area if area > 0 else np.nan,
+                "Isolated Nodes / Area": num_isolated / area if area > 0 else np.nan,
+            }
 
+                new_df = pd.DataFrame([row_data]).set_index("Embryo_ID")
+                summary_df = pd.concat([summary_df, new_df])
                 save_summary(summary_df)
+                print(f"Embryo {embryo_ID} statistics saved successfully.")
+            
     return summary_df
 
 
@@ -255,19 +267,15 @@ def violins(df,nodes_all_stages):
 
 def gen_networkx_graph(nodes,adj):
     adj.columns = adj.columns.astype(int)
-    G = nx.Graph()
 
+    adj_matrix = adj.fillna(0).values
+    G = nx.from_numpy_array(adj_matrix)
+
+    node_attributes = {}
     for i in nodes.index:
         node = nodes.loc[i]
-        #G.add_node(i)#,weight=node["weight"])
-        G.add_nodes_from([(i, {"x": int(node["x"]), "y": int(node["y"]), "weight":float(node["weight"])})])
-
-    for i in adj.index:
-        for j in adj.columns:
-            weight = adj.loc[i,j]
-            if weight>0:
-                G.add_edge(i,j,weight=weight)
-    #nx.draw(G, with_labels=True)
+        node_attributes[i] = {"x": int(node["x"]), "y": int(node["y"]), "weight":float(node["weight"])}
+    nx.set_node_attributes(G,node_attributes)
     return G
 
 
