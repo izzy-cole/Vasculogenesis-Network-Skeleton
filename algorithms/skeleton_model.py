@@ -41,7 +41,8 @@ def find_pixel_neighbours(image,x,y):
     return neighbours
 
 
-def traverse(pixels,nodes,path):
+def traverse(node_set,pixels,nodes,path):
+   
     while True:
         #current x and y
         x=int(path[-1][0])
@@ -52,7 +53,7 @@ def traverse(pixels,nodes,path):
         #print(x,y)
 
         #search for a match in the nodes list - the path is complete
-        if len(nodes[(nodes["x"]==x) & (nodes["y"]==y)])>0:
+        if (x,y) in node_set:
             #print(f"Found end: {path[-1]}")
             return path
         
@@ -80,20 +81,24 @@ def traverse(pixels,nodes,path):
                 return path
             
 
-def coords_to_id(nodes,x,y):
-   return nodes[(nodes["x"]==x) & (nodes["y"]==y)].index
+def make_coord_to_id_dict(nodes):
+    xs = nodes["x"].values
+    ys = nodes["y"].values 
+    n = len(nodes.index)
+    coord_to_id = {}
+    for i in range(n):
+        coord = (xs[i],ys[i])
+        coord_to_id[coord] = i
+    return coord_to_id
 
-#Replace with ???
-#coord_to_id = {}
-#    for i in range(n):
-#        coord = (xs[i],ys[i])
-#        coord_to_id[coord] = i
-
+def coords_to_id(coord_to_id_dict, x, y):
+    return coord_to_id_dict.get((x, y))
 
 def nodes_edges_from_image(image,dists):
 
     nodes = pd.DataFrame(data=None, columns=["x","y","type","weight"]) #main datastructure
-    pix_neighbours = pd.Series(data=None) #keep temp track of white pixel neighbours
+    #pix_neighbours = pd.Series(data=None) #keep temp track of white pixel neighbours
+    pix_neighbours = []
 
     height = len(image)
     width = len(image[0])
@@ -118,18 +123,20 @@ def nodes_edges_from_image(image,dists):
                     #print(f"coord {x,y} is a node with {count} neighbours and weight {weight} and adjacencies {neighbours}")
 
                     nodes_data.append({"x": x, "y": y, "type": "junction", "weight": weight})
-                    pix_neighbours.loc[n] = neighbours
+                    pix_neighbours.append(neighbours)
                     n+=1
                     #print(f"junction {x,y}")
 
                 elif count <= 1: #end point or single node
                     nodes_data.append({"x": x, "y": y, "type": "endpt", "weight": weight})
 
-                    pix_neighbours.loc[n] = neighbours
+                    pix_neighbours.append(neighbours)
                     n+=1
 
     #Build dataframe at the end (faster than .loc)
     nodes = pd.DataFrame(nodes_data)
+    coord_to_id_dict = make_coord_to_id_dict(nodes)
+    node_set = set(coord_to_id_dict.keys())
 
     #set up adjacency matrix     
     adj = pd.DataFrame(data=np.full((n,n),np.nan))
@@ -139,21 +146,19 @@ def nodes_edges_from_image(image,dists):
         y1=nodes["y"].loc[i]
         id1=i
         #for each neighbour, we traverse the path to find the node it is connected to
-        for j in pix_neighbours.loc[i]:
-            path = traverse(pixels_set,nodes,[(x1,y1),tuple(j)])
+        for j in pix_neighbours[i]:
+            path = traverse(node_set,pixels_set,nodes,[(x1,y1),tuple(j)])
             x2,y2 = path[-1]
-            id2 = coords_to_id(nodes,x2,y2)
+            id2 = coords_to_id(coord_to_id_dict,x2,y2)
             #set the adjacency value as the length of the path in microns
             adj.loc[id1,id2] = (len(path)-1)*microns_per_pixel#subtract one because the path includes both start and end points
 
     return nodes,adj
 
-
 def get_node_adjacencies(adj,id):
     #searches the 'id' row and returns any indexes with a nonzero value (so an adjancency)
     row = adj.loc[id]
     return row[row>0].index.tolist()
-
 
 
 def merge_nearby_nodes(nodes,adj):
@@ -196,7 +201,6 @@ def merge_nearby_nodes(nodes,adj):
     nodes = nodes.drop(index=list(del_set))
     adj = adj.drop(index=list(del_set), columns=list(del_set))
     return nodes,adj
-
 
 def form_networks_all(path,skips=[],drug=None):
 
@@ -269,4 +273,3 @@ def form_networks_all(path,skips=[],drug=None):
                 print("\n")
             else:
                 print(f"Existing file found for image HH{stage}, n{n} {condition}. Embryo ID: {embryo_ID}.")
-
