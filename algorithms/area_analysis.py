@@ -101,14 +101,14 @@ def normalised_area_graph(embryo_ID_list):
     plt.xlabel("HH Stage")
     plt.ylabel("Area ($\\mu m^2$)")
 
-    plt.title(f"Area Distribution over Embryo Development")
+    plt.title(f"Blood Island Area over Embryo Development")
     plt.show()
 
     sns.lineplot(data=area_df, x="Stage",y="Normalised Area", linewidth=2.5)
     plt.xlabel("HH Stage")
     plt.ylabel("Fractional Area (Normalised to Embryo Size)")
 
-    plt.title(f"Area Distribution over Embryo Development")
+    plt.title(f"Blood Island Area over Embryo Development")
     plt.show()
 
 def area_distribution_plot(embryo_ID):
