@@ -94,6 +94,7 @@ def register_skeleton_summary_data():
                 "Number of Nodes / Area": num_nodes / area if area > 0 else np.nan,
                 "Basis Cycles / Area": num_cycles / area if area > 0 else np.nan,
                 "Isolated Nodes / Area": num_isolated / area if area > 0 else np.nan,
+                "Number of Components, Exlcuding Isolated Nodes / Area": (num_components - num_isolated) / area if area > 0 else np.nan,
             }
 
                 new_df = pd.DataFrame([row_data]).set_index("Embryo_ID")
