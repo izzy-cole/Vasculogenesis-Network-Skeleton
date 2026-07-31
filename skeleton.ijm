@@ -8,7 +8,7 @@ record_metadata=true;
 //specify stages and n
 stages = newArray(3,4,5,6,7,8,9,10,11,12,13);
 n_max = 5;
-conditions = newArray("","_10um","_20um","_30um","_40um","_50um","_control","_75um","_100um","_0-1","_0-5","_1"); //empty string allows for no conditions in non-drug case
+conditions = newArray("","_10um","_20um","_30um","_40um","_50um","_control","_75um","_100um","_0-1","_0-5","_1","_0-1left","_0-5left","_1left","_controlleft"); //empty string allows for no conditions in non-drug case
 
 //configure the main and save path (comment/uncomment)
 //Todo: set this up with a dialogue box.
@@ -21,11 +21,11 @@ save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/
 csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/imageJ_metadata.csv";
 
 //Drugs:
-date = "20260710";
-drug_name="dispace";
-main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/drugs/"+date+"_"+drug_name+"/";
-save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
-csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/"+date+"_"+drug_name+"_imageJ_metadata.csv";
+//date = "20260710";
+//drug_name="dispace";
+//main_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/imageJ/raw/drugs/"+date+"_"+drug_name+"/";
+//save_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/raw/drugs/"+date+"_"+drug_name+"/";
+//csv_path = "C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/imagej/"+date+"_"+drug_name+"_imageJ_metadata.csv";
 
 
 //spatial resolution: number of pixels per micron
