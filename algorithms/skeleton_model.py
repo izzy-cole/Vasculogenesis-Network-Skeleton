@@ -9,14 +9,14 @@ import algorithms.database as database
 from config import processed_path
 from config import microns_per_pixel, base_merge, sensitivity_merge, col_threshold
 
-def find_white_pixel_neighbours(image,x,y):
+def find_white_pixel_neighbours(image,x,y,white):
     """returns a list of adjacent white pixels"""
 
     offsets = [(1, 0), (0, 1), (-1, 0), (0, -1),   
             (1, 1), (-1, 1), (1, -1), (-1, -1)]
 
     #Define the threshold for what a white pixel is ()
-    white = [255*(1-col_threshold)]*3
+    #white = [255*(1-col_threshold)]*3
     neighbours = []
 
     for i in offsets:
@@ -31,7 +31,8 @@ def find_white_pixel_neighbours(image,x,y):
 def traverse_edge(node_set,white_pixels,dists,nodes,path):
     """Start from a node, then traverse the pixel edge until another node is met.
     Updated: now records the edge thickness."""
-    thickness=0
+    x_start,y_start = path[0][0], path[0][1]
+    thickness  = dists[y_start,x_start]
     offsets = [(1, 0), (0, 1), (-1, 0), (0, -1),   
         (1, 1), (-1, 1), (1, -1), (-1, -1)]
    
@@ -105,7 +106,7 @@ def nodes_edges_from_image(image,dists):
             #if pixel is white (within a tolerance threshold to allow for changes in colour due to compression)
             if image[y][x]> white: 
                 white_pixels.append([x,y]) #form white pixel list
-                neighbours = find_white_pixel_neighbours(image,x,y) #find neighbours
+                neighbours = find_white_pixel_neighbours(image,x,y,white) #find neighbours
                 #print(f"{x,y}'s neighbours are {neighbours}")
 
                 count = len(neighbours)
