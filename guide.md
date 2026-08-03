@@ -22,7 +22,7 @@ For a regular dataset (no drugs, no timeseries live imaging), "condition", is ig
 
 
 
-Config.py
+**Config.py**
 
 
 
@@ -71,4 +71,14 @@ local\_threshold\_radius=30;
 2\. Low contrast mode - the normal local thresholding (Bernsen) uses a minimum contrast value (derived from the image histogram) to avoid thresholding noise or background edges. In the case of poor image quality (e.g. blood islands not showing up), turn on low contrast mode to skip this - but will require more manual deletion of background noise.
 
 3\. Thin vessel mode ??
+
+
+
+Deletion and data handling
+
+
+
+File walkthrough
+
+Skeleton\_visualisation
 
