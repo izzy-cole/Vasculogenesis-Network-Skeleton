@@ -50,6 +50,7 @@ def register_skeleton_summary_data():
 
                 nodes = pd.read_csv(nodes_path / f"{embryo_ID}_nodes.csv", index_col = 0)
                 adj = pd.read_csv(nodes_path / f"{embryo_ID}_adj.csv", index_col = 0)
+                edges = pd.read_csv(nodes_path / f"{embryo_ID}_edges.csv", index_col = 0)
                 adj.columns = adj.columns.astype(int)
 
                 metadata_df = database.initialise_metadata()
@@ -95,6 +96,7 @@ def register_skeleton_summary_data():
                 "Basis Cycles / Area": num_cycles / area if area > 0 else np.nan,
                 "Isolated Nodes / Area": num_isolated / area if area > 0 else np.nan,
                 "Number of Components, Exlcuding Isolated Nodes / Area": (num_components - num_isolated) / area if area > 0 else np.nan,
+                "Mean Edge Thickness": np.mean(edges["thickness"])
             }
 
                 new_df = pd.DataFrame([row_data]).set_index("Embryo_ID")
