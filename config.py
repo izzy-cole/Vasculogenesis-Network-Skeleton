@@ -9,6 +9,7 @@ from pathlib import Path
 
 #Main set
 data_path = Path("C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/data/")
+results_path = Path("C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/skeleton/results/")
 
 imagej_metadata_path = data_path / "imagej"
 main_image_path = data_path / "raw" / "main" 
@@ -16,7 +17,6 @@ drugs_image_path = data_path / "raw" / "drugs"
 live_imaging_path =  data_path / "raw" / "live_imaging"
 
 processed_path = data_path / "processed" 
-results_path = Path("C:/Users/isabe/Documents/work/systems bio/modelling vasculogenesis/python/skeleton/results/")
 
 
 #spatial resolution: number of pixels per micron
@@ -31,6 +31,7 @@ sensitivity_merge=0.15 #multiplier term
 col_threshold = 0.85
 
 
+#I think this does not do anything right now?
 conditions = ["","_10um","_20um","_30um","_40um","_50um","_control"] #empty string allows for no conditions in non-drug case
 
 #input images MUST be .tiffs: the distance map information needs to be stored as 32 bit .tif data to record an objective measurement in microns
