@@ -156,7 +156,7 @@ def plot_feature_by_stage(feature,title="",embryo_ID_list=None,save_path=None):
 
     plt.show()
 
-def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_order=None,save_path=None,live=False):
+def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_order=None,save_path=None,live=False,time_step=None):
 
     master_df = load_master_df()
     drug = master_df.loc[int(embryo_ID_list[0]),"Drug"]
@@ -188,9 +188,16 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_o
 
     #Set up relevant titles and labelling
     if live:
-        plt.xlabel(f"Time Frame")
-        ticks = np.arange(1,len(master_df.index)+1,int(len(master_df.index)/10))
-        plt.xticks(ticks,ticks)
+        if time_step is None:
+            plt.xlabel(f"Time Frame")
+            #Designed to show ~10 time intervals, to stop the x axis getting too crowded 
+            ticks = np.arange(0,len(master_df.index)+1,int(len(master_df.index)/10))
+            plt.xticks(ticks,ticks)
+        else:
+            plt.xlabel(f"Time Passed in Minutes")
+            #Shows the axis in time steps
+            ticks = np.arange(0,len(master_df.index)+1,int(len(master_df.index)/10))
+            plt.xticks(ticks,ticks*time_step)
         if title!="":
             plt.title(f"Live Imaging: {title} Over Time")
         else:
@@ -219,53 +226,6 @@ def plot_feature_by_condition(feature,title=None,embryo_ID_list=None,condition_o
             plt.savefig(save_path / f"{feature}.svg", transparent=True,dpi=300)
             plt.savefig(save_path / f"{feature}.png", transparent=True,dpi=300)
 
-    plt.show()
-   
-
-##not sure this is working
-def violins(df,nodes_all_stages):
-    # 1. Create an empty list to hold all our individual dataframes
-    all_dataframes = []
-
-    # 2. Loop through every stage and every embryo
-    for stage, embryos in enumerate(nodes_all_stages):
-        for n, df in enumerate(embryos):
-            
-            # Make a copy so we don't accidentally modify your original data
-            temp_df = df.copy()
-            
-            # 3. Add the metadata as new columns! 
-            # This is the crucial step for Seaborn so it knows where each node came from.
-            temp_df['HH Stage'] = stage
-            temp_df['Embryo ID'] = n
-            
-            # Append this updated dataframe to our list
-            all_dataframes.append(temp_df)
-
-    # 4. Mash them all together into one giant DataFrame
-    # ignore_index=True ensures we get a fresh set of row numbers from 0 to N
-    flat_df = pd.concat(all_dataframes, ignore_index=True)
-
-    # Let's verify it worked
-    print(flat_df[['HH Stage', 'Embryo ID', 'weight']].head())
-
-
-
-    plt.figure(figsize=(12, 6))
-
-    # Plot the full distribution of node weights per stage
-    sns.violinplot(
-        data=flat_df, 
-        x='HH Stage', 
-        y='weight',          # Make sure this exactly matches your column name
-        hue='Embryo ID',     # Optional: Splits the violins to show each embryo side-by-side
-        palette='muted',
-        inner='quartile'
-    )
-
-    plt.title('Distribution of Node Weights Across HH Stages')
-    plt.ylabel('Node Weight')
-    plt.xlabel('HH Stage')
     plt.show()
 
 def gen_networkx_graph(nodes,adj):
