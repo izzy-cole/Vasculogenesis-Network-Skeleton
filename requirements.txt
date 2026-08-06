@@ -1,4 +1,4 @@
-cv2
+opencv
 matplotlib
 numpy
 pandas
@@ -10,3 +10,4 @@ skimage
 pathlib
 os
 seaborn
+covert-tif-to-png

@@ -250,11 +250,29 @@ Embryo width is defined by the minimum and maximum x coordinate of nodes.
 
 Additional analysis files:
 
+
+
 Area\_analysis\_results.ipynb: contains plots for the entire embryo size, blood island size and component distribution.
 
 network\_type\_analysis\_results.ipynb: contains plots for the degree distribution and clustering coefficient per embryo.
 
-spatial\_analysis.ipynb: splits the embryo into grid regions to compare spatial properties.
+
+
+
+
+**spatial\_analysis\_grid.ipynb:** Splits the embryo into grid regions to compare spatial properties. The code is not very robust at the moment. You can adjust the n\_rows and n\_cols to adjust the number of rows and columns in the grid but I think plotting will only work for n=2 (so left/right, anterior/posterior).
+
+
+
+**spatial\_analysis\_distance.iypnb:** Instead of using a grid to determine spatial properties, determine how close each blood island is to the centre of the embryo and use this to parameterise factors like node size. Uses the ellipse properties which are fitted by the user in ImageJ.
+
+
+
+The distance parameter is based on the following:
+
+Calculate the radius of the ellipse that a given coordinate would lie on, given a centre point, and a and b.
+
+Since the original radius is always 1: (x-c1)\*\*2/a\*\*2 + (y-c2)\*\*2/b\*\*2=1, this tells us, in a radial sense, how "far" the point is from the centre of the embryo, on a scale from 0 (at the centre) to 1 (on the edge of the ellipse).
 
 
 
@@ -269,6 +287,14 @@ You do not need to delete or rerun anything to add more embryos to the dataset. 
 If you want to rerun the model, delete the .csv files from data/processed/skeleton\_networks, delete metadata.csv and summary.csv.
 
 If you want to rerun the preprocessing and the model, delete the above, AND delete the files in python/data/raw/main (or drugs), and data/imagej/imageJ\_metadata.csv
+
+
+
+
+
+Explanation of coding implementation
+
+* When appending to dataframes in a loop, it is faster to append data as a dictionary to a list, then convert this list to a dataframe at the very end (as .loc in a loop is quite slow)
 
 
 
