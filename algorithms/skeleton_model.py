@@ -40,7 +40,7 @@ def traverse_edge(node_set,white_pixels,dists,nodes,path):
         #current x and y
         x=int(path[-1][0])
         y=int(path[-1][1])
-        thickness += dists[y,x]
+        thickness += dists[y,x] * microns_per_pixel
 
         #keep track of previous pixel to avoid backtracking
         prev=tuple(path[-2])
@@ -110,7 +110,7 @@ def nodes_edges_from_image(image,dists):
                 #print(f"{x,y}'s neighbours are {neighbours}")
 
                 count = len(neighbours)
-                weight = dists[y][x] #get the node weight from the distance map
+                weight = dists[y][x]*microns_per_pixel #get the node weight from the distance map (in pixels) then convert to microns
 
                 if count > 2: #a junction
                     #print(f"coord {x,y} is a node with {count} neighbours and weight {weight} and adjacencies {neighbours}")
