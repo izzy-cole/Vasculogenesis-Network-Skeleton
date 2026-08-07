@@ -10,4 +10,3 @@ skimage
 pathlib
 os
 seaborn
-covert-tif-to-png

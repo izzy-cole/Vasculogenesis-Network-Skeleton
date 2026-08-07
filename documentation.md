@@ -14,6 +14,34 @@
 
 
 
+###### **Installation**
+
+1. Clone the repository from GitHub:
+
+&#x09;*git clone git@github.com:izzy-cole/Vasculogenesis-Network-Skeleton.git*
+
+2\. Change cd to the current folder:
+
+&#x09;*cd Vasculogenesis-Network-Skeleton*
+
+3\. Set up your virtual environment
+
+4\. Install the required packages:
+
+&#x09;*pip install -r requirements.txt*
+
+5\. Set up the file paths in *config.py* and in the preprocessing macros (*skeleton.ijm, live\_imaging.ijm*)
+
+
+
+To update:
+
+*git clone git@github.com:izzy-cole/Vasculogenesis-Network-Skeleton.git*
+
+
+
+
+
 ###### **File naming conventions and data storage**
 
 Embryos are strictly named in the format "*hh\[stage]\_n\[replicate]\_\[condition] \[imagetype].tif*", e.g.  "*hh4\_n2\_10um BC.tif"*
@@ -80,7 +108,11 @@ Radius for local thresholding in pixels.
 
 **Running and outputs**
 
-Follow the macro instructions, which includes taking embryo measurements, adjusting brightness/contrast, and removing noise. The macro writes to the save path specified, either *python/data/raw/main* or "*python/data/raw/drugs/\[date]\_\[drug\_name]*".
+Follow the macro instructions, which includes taking embryo measurements, adjusting brightness/contrast, and removing noise. See example video. 
+
+Set B/C in the best possible way as not to corrupt data, ie. set the maximum so that blood islands are bright but not overexposed, and minimum so that the background is black but blood islands are not lost.
+
+The macro writes to the save path specified, either *python/data/raw/main* or "*python/data/raw/drugs/\[date]\_\[drug\_name]*". ImageJ will **not** create this folder automatically (sorry) so make sure it exists (or it will crash).
 
 Images that have already been processed are skipped.
 
@@ -88,7 +120,7 @@ Images that have already been processed are skipped.
 
 The following outputs are saved:
 
-python/data/imagej/**imageJ\_metadata.csv**: contains metadata and measurements that will be read by Python later.
+python/data/imagej/**imageJ\_metadata.csv**: contains metadata and measurements that will be read by Python later. The measurements are in microns.
 
 python/data/raw/main/**particles.tif**: the thresholded particles file showing blood islands in white
 
@@ -182,6 +214,16 @@ Contains 3 key steps to setting up the skeleton networks
 
 
 
+**Data structures**
+
+Nodes: a dataframe containing node information: the node id (its index), x and y coordinate (in pixels), and weight (in microns). Note the node id can skip numbers because some nodes are merged (and node id's are not reallocated)
+
+Adj: a dataframe matrix where the index and columns are node id's, and the values represent the edge length between nodes. If no edge exists the value is set to nan
+
+Edges: a dataframe containing edge information: the edge id (its index) the start node id, the end node id, edge length (in microns) and thickness (in microns).
+
+
+
 ###### **3. Visualisation**
 
 skeleton\_visualisation.iypnb and algorithms/visualisation.py
@@ -210,7 +252,7 @@ The code works as follows: use *database.get\_embryo\_IDs\_from\_drug()*, which 
 
 The plots are automatically saved as .svg and .png files if save=True, in the folder *python/skeleton/results/skeleton\_analysis\_results/main*
 
-It is recommended to run with save=False to check if the data looks reasonable, then set save=True, to avoid overwriting data with faulty graphs.
+It is recommended to run with save=False to check if the data looks reasonable, then set save=True, to avoid overwriting data with faulty graphs. Note if the titles change, it will save as a different plot (which can lead to old data - if titles are changed, it is maybe best to clear the folder first).
 
 
 
@@ -299,4 +341,19 @@ Explanation of coding implementation
 
 
 **How to add more analysis**
+
+Some parameters can easily be added from the underlying data structures or via NetworkX. If the property is one number per embryo (e.g. mean node degree, NOT node degree (one number per node)), it can be added in via adding a new *key:value* pair to *row\_data* in *algorithms/analysis.py*.
+
+Then, just rerun *analysis.register\_skeleton\_summary\_data()* in *run\_skeleton\_model.ipynb* and rerun the graphical plots in *skeleton\_analysis\_results.ipynb*. For more complex analysis, you can use a separate notebook and load in the datastructures *nodes, edges, adj*. See *additional\_notebooks* for examples.
+
+**Known issues log**
+Need type validation on metadata and summary df's
+Check embryo ID is not negative before generating network
+Create folder if not existing
+Do not write duplicate rows to metadata\_df
+
+
+
+ImageJ:
+Only write metadata if image is accepted
 

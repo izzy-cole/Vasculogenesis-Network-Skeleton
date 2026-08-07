@@ -19,7 +19,7 @@ def image_plot(image,size,x_min=0,y_min=0):
 
     plt.show()
 
-def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_weights=False,node_weights=False,x_min=0,y_min=0,node_scaling=1,edge_scaling=1):
+def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_weights=False,node_weights=False,x_min=0,y_min=0,node_scaling=1,edge_scaling=1,skeleton_image=None):
     fig,ax=plt.subplots(figsize=(10,10))
     x_max,y_max = x_min+size[0],y_min+size[1]
 
@@ -55,26 +55,33 @@ def nodes_plot(image,nodes,adj,size,node_alpha=0.4,edge_alpha=1,im_alpha=1,edge_
 
     lines = []
     #code for edges
-    for i in adj:
-        for j in adj:
-            #avoid plotting twice (symmetric adj matrix)
-            if i>j:
-                dist = adj.loc[i,j]
-                if dist>0:
-                    x1,y1=nodes[["x","y"]].loc[i]
-                    x2,y2=nodes[["x","y"]].loc[j]
-                    #Check range
-                    if x_min<=x1<=x_max and y_min<=y1<=y_max:
-                        lines.append([[x1,y1],[x2,y2]])
+    if skeleton_image is None:
+        #Run through the adj matrix to draw the edges
+        for i in adj:
+            for j in adj:
+                #avoid plotting twice (symmetric adj matrix)
+                if i>j:
+                    dist = adj.loc[i,j]
+                    if dist>0:
+                        x1,y1=nodes[["x","y"]].loc[i]
+                        x2,y2=nodes[["x","y"]].loc[j]
+                        #Check range
+                        if x_min<=x1<=x_max and y_min<=y1<=y_max:
+                            lines.append([[x1,y1],[x2,y2]])
 
-                        #text labelling
-                        av_x,av_y = (x1+x2)/2, (y1+y2)/2
-                        if edge_weights:
-                            ax.text(av_x, av_y, str(int(dist)), ha='left', va='bottom', fontsize=20, color='white' ,font="arial",weight="bold")
+                            #text labelling
+                            av_x,av_y = (x1+x2)/2, (y1+y2)/2
+                            if edge_weights:
+                                ax.text(av_x, av_y, str(int(dist)), ha='left', va='bottom', fontsize=20, color='white' ,font="arial",weight="bold")
 
-    lc = LineCollection(lines, colors="tab:blue", alpha=edge_alpha, linewidths=5*edge_scaling, zorder=2)
-    ax.add_collection(lc)
+        lc = LineCollection(lines, colors="tab:blue", alpha=edge_alpha, linewidths=5*edge_scaling, zorder=2)
+        ax.add_collection(lc)
 
+    else:
+        #Get the edges from the skeleton image (so they are curved correctly)
+        print(skeleton_image)
+        white = 255*(1-col_threshold)
+        skeleton_image[skeleton_image==white]
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_max, y_min)
     plt.show()
